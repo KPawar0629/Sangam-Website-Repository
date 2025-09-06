@@ -77,7 +77,7 @@
 
         <p><strong>Team Sangam</strong></p>
         <div style="background-color:#f9f9fa;border-radius:6px;padding:12px">
-            <p style="padding:0;margin:0"><strong>Need help or have questions?</strong> <a href="mailto:sbdesis@gmail.com" target="_blank">
+            <p style="padding:0;margin:0"><strong>Need help or have questions?</strong> <a href="mailto:inception.kaustubh@gmail.com" target="_blank">
                 Contact the event organizer</a></p>
         </div><br>
     </div>

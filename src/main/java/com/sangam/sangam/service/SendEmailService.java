@@ -48,7 +48,7 @@ public class SendEmailService {
     @Autowired
     private FreeMarkerConfigurer freeMarkerConfigurer;
 
-    private String fromEmailId = "sbdesis@gmail.com";
+    private String fromEmailId = "inception.kaustubh@gmail.com";
 
     @Async
     public void sendPaymentEmailAsync(String recipient, Model model) {
@@ -90,7 +90,7 @@ public class SendEmailService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
             mimeMessageHelper.setFrom(fromEmailId);
-            mimeMessageHelper.setTo("sbdesis@gmail.com");
+            mimeMessageHelper.setTo("inception.kaustubh@gmail.com");
             mimeMessageHelper.setSubject(emailSubject);
 
             Map<String, Object> modelMap = model.asMap();
