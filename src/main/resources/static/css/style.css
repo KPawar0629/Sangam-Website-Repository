@@ -1,0 +1,457 @@
+* {
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+  text-decoration: none;
+}
+
+.main-content {
+  text-align: center;
+  max-height: 65%;
+  background: linear-gradient(90, #f4c542, #fff, #a8d8a3);
+}
+
+.cont {
+  width: 90%;
+  height: 75vh;
+  display: grid;
+  grid-template-rows: repeat(4, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 5px;
+  margin: 2% auto;
+}
+
+.right2 .btn {
+  margin-top: 20%;
+}
+
+.item {
+  text-align: center;
+}
+
+.main-logo {
+  width: 80%;
+  height: auto;
+}
+/* .card-btn {
+  width: 80%;
+}
+.card-row {
+  margin: 0 auto;
+} */
+
+.main {
+  grid-row-start: 1;
+  grid-row-end: 5;
+  grid-column-start: 2;
+  grid-column-end: 4;
+}
+
+.right {
+  grid-row-start: 1;
+  grid-row-end: 4;
+  grid-column-start: 4;
+  grid-column-end: 5;
+}
+
+.right2 {
+  grid-row-start: 4;
+  grid-row-end: 5;
+  grid-column-start: 4;
+  grid-column-end: 5;
+}
+
+/* .left1 {
+  grid-row-start: 1;
+  grid-row-end: 3;
+  grid-column-start: 1;
+  grid-column-end: 2;
+}
+
+.left2 {
+  grid-row-start: 3;
+  grid-row-end: 5;
+  grid-column-start: 1;
+  grid-column-end: 2;
+} */
+
+.left {
+  margin: 0 0 0 -5px;
+  grid-row-start: 2;
+  grid-row-end: 5;
+  grid-column-start: 1;
+  grid-column-end: 2;
+}
+
+.signin-form {
+  border: 2px dashed grey;
+  background-color: white;
+  border-radius: 5px;
+}
+
+.signup-form {
+  margin-top: 10%;
+  padding: 10%;
+}
+
+a {
+  text-decoration: none;
+}
+
+.sidebar-widget {
+  background: linear-gradient(0, #f4c542, #fff, #a8d8a3);
+}
+.right-sidebar-widget {
+  background: linear-gradient(0, #f4c542, #fff, #a8d8a3);
+}
+.right-sidebar-widget {
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 82.5vh;
+  display: block;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+.main-content {
+  background: linear-gradient(0, #f4c542, #fff, #a8d8a3);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.sidebar-widget {
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 40vh;
+  display: block;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sidebar .card {
+  margin: auto;
+}
+
+.main-carousel {
+  max-height: 60em;
+}
+
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: linear-gradient(180deg, #f4c542, #fff, #a8d8a3);
+}
+
+body {
+  background: linear-gradient(180deg, #f4c542, #fff, #a8d8a3);
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* Table Container */
+.table {
+  background: rgba(
+    255,
+    255,
+    255,
+    0.9
+  ); /* Light background with some transparency */
+  border-radius: 10px; /* Rounded corners for the table */
+  overflow: hidden; /* Ensure rounded corners are applied */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for elevation */
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Table Header */
+.table thead th {
+  background-color: #f4c542;
+  /* Gradient background for header */
+  color: #fff; /* White text color for contrast */
+  text-align: center; /* Center align text in header */
+}
+
+/* Table Body */
+.table tbody tr {
+  background: #fff; /* White background for rows */
+  border-bottom: 1px solid #ddd; /* Subtle border for row separation */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #f9f9f9; /* Alternating row background for readability */
+}
+
+/* Table Data */
+.table td {
+  vertical-align: middle; /* Center align text vertically */
+  text-align: center; /* Center align text horizontally */
+}
+
+/* Button Styling within the Table */
+.table td a.btn {
+  margin: 2px; /* Small margin around buttons */
+}
+
+/* Button Colors */
+.table .btn-primary {
+  background-color: #007bff; /* Bootstrap primary color */
+  border-color: #007bff; /* Same border color */
+}
+
+.table .btn-success {
+  background-color: #28a745; /* Bootstrap success color */
+  border-color: #28a745; /* Same border color */
+}
+
+.table .btn-warning {
+  background-color: #ffc107; /* Bootstrap warning color */
+  border-color: #ffc107; /* Same border color */
+}
+
+.table .btn-danger {
+  background-color: #dc3545; /* Bootstrap danger color */
+  border-color: #dc3545; /* Same border color */
+}
+
+/* Container that will fill the remaining space */
+#main-content {
+  min-height: 60vh; /* Ensure the container takes at least the full viewport height */
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  min-height: 50px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+}
+.dashboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center; /* Center the widgets horizontally */
+}
+
+.carousel-container {
+  height: 300px; /* Default height */
+}
+
+.widget {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(200, 240, 192, 0.9)
+  ); /* Gradient from white to light green */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  flex: 1;
+  min-width: 280px;
+  text-align: center;
+  position: relative;
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.widget h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #f4a300; /* Saffron color for headings */
+  font-weight: 700;
+}
+.widget p {
+  font-size: 2.5rem;
+  color: #333;
+  margin: 10px 0;
+}
+.widget canvas {
+  max-width: 100%;
+  height: 150px; /* Adjust height for smaller donut size */
+  width: 150px; /* Adjust width for smaller donut size */
+  display: block;
+  margin: 0 auto;
+}
+.stats-header {
+  background: linear-gradient(135deg, #f4a300, #ffffff, #d0f0c0);
+  color: #333;
+  padding: 20px;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 600;
+  border-bottom: 5px solid #0056b3;
+  border-radius: 0 0 12px 12px;
+}
+
+footer {
+  min-height: 50px;
+  background: linear-gradient(0deg, #f4c542, #a8d8a3);
+}
+.main-text {
+  font-size: 3rem; /* Larger font size for the site title */
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Drop shadow effect */
+  color: white;
+}
+
+.modal-content {
+  background: linear-gradient(45deg, #f4c542, #a8d8a3);
+}
+
+@media (max-width: 768px) {
+  .cont {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    margin: 5% auto 100% auto;
+    width: 90%;
+  }
+
+  .main {
+    grid-row-start: 1;
+    grid-row-end: 2;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  .right {
+    grid-row-start: 2;
+    grid-row-end: 3;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  /* .left1 {
+    grid-row-start: 3;
+    grid-row-end: 4;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  .left2 {
+    grid-row-start: 4;
+    grid-row-end: 5;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  } */
+
+  .right2 {
+    grid-row-start: 4;
+    grid-row-end: 5;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  .left {
+    grid-row-start: 5;
+    grid-row-end: 6;
+    grid-column-start: 1;
+    grid-column-end: 4;
+  }
+
+  .cont {
+    grid-gap: 10px;
+  }
+}
+
+.carousel-img,
+.main-carousel img {
+  width: 70%;
+  height: auto;
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.pricing-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  z-index: 1000;
+  text-align: left;
+}
+
+.pricing-dropdown p {
+  margin: 5px 0;
+  font-size: 100%;
+}
+
+@media screen and (max-width: 400px) {
+  .pricing-dropdown p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .hide-on-md {
+    display: none;
+  }
+
+  footer {
+    margin-top: 100% !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 3000px) {
+  .show-on-phone {
+    display: none;
+  }
+}
+
+/* Ensure the body takes at least the full viewport height */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* Main content should take all available space */
+.main-content {
+  flex: 1;
+}
+
+/* Footer styling */
+footer {
+  background-color: #343a40;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  position: relative;
+  width: 100%;
+}
+
+.disclaimer {
+  max-width: 700px;
+  margin: auto;
+}
+
+.disclaimer h2 {
+  font-weight: bold;
+}
+
+.disclaimer p {
+  line-height: 1.6;
+}
