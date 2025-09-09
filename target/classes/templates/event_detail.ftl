@@ -110,9 +110,11 @@
     </style>
 </head>
 <body>
-<#include "nav.ftl">
-
-<div class="container">
+<div class="d-flex flex-column min-vh-100">
+    <#include "nav.ftl">
+    <link href="/css/style.css" rel="stylesheet" type="text/css"/>
+    <main class="container mt-4 flex-grow-1">
+        <div class="container">
     <div class="event-details">
         <h1>${event.eventName}</h1>
         <img src="${event.imageUrl}" alt="${event.eventName}" class="event-image mb-5">
@@ -224,10 +226,10 @@
     </div>
     </div>
 </div>
+    </main>
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
+    </footer>
 </div>
-
-<footer class="bg-dark text-white text-center py-3">
-    <p>2025 Sangam &copy;. All Rights reserved.</p>
-</footer>
 </body>
 </html>

@@ -95,10 +95,13 @@
     </style>
 </head>
 <body>
+<div class="d-flex flex-column min-vh-100">
     <#include "nav.ftl">
-    <link href="./css/style.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet" type="text/css"/>
 
-    <div class="content">	
+    <main class="flex-grow-1">
+        <div class="container mt-5">
+            <div class="content">	
         <section id="introduction" class="section">
 
             <img src="/imgs/aboutus/together.jpg" alt="Introduction Image">
@@ -180,12 +183,12 @@
         </div>		
 
     </div>
+        </div>
+    </main>
 
-    <footer class="bg-dark text-white text-center py-3">
-        <p>2025 Sangam &copy;. All Rights reserved.</p>    
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
     </footer>
-
-
-    <#--  <#include "footer.ftl">  -->
+</div>
 </body>
 </html>

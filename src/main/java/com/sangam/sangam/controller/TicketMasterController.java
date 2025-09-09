@@ -10,17 +10,22 @@ import com.sangam.sangam.service.EventService;
 import com.sangam.sangam.service.SendEmailService;
 import com.sangam.sangam.service.TicketDetailsService;
 import com.sangam.sangam.service.TicketMasterService;
+import com.sangam.sangam.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.URLEncoder;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Controller
@@ -36,6 +41,8 @@ public class TicketMasterController {
     private TicketDetailsService ticketDetailsService;
     @Autowired
     private SendEmailService emailService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/tickets/new/{eventId}")
     public String showTicketForm(Model model, HttpSession session, @PathVariable String eventId) {
@@ -243,14 +250,115 @@ public class TicketMasterController {
         return "ticket_list";
     }
 
-    @GetMapping("/tickets/delete/{ticketId}")
-    public String deleteTicket(@PathVariable String ticketId, Model model) {
-        TicketMaster ticket = ticketMasterService.findTicketMasterById(ticketId);
-        List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(ticket.getTicketMasterId());
-        for(TicketDetails detail : details) {
-            ticketDetailsService.deleteTicketDetails(detail.getDetailId());
+    @GetMapping("/payment/{masterId}")
+    public String receivePayment(@PathVariable String masterId, HttpSession session, RedirectAttributes redirectAttributes, HttpServletRequest request, Model model) {
+        String authToken = null;
+
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(var cookie : cookies) {
+                if(cookie.getName().equals("authToken")) {
+                    authToken = cookie.getValue();
+                }
+            }
         }
-        ticketMasterService.deleteTicketMaster(ticketId);
+        var user = new User();
+        if(authToken != null) {
+            if(userService.validateToken(authToken)) {
+                user = userService.getUserByToken(authToken).get();
+                model.addAttribute("loggedInUser", user);
+            } else {
+                return "redirect:/signin";
+            }
+        } else {
+            return "redirect:/signin";
+        }
+
+        TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
+        String eventId = "";
+
+        if (master != null) {
+            List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(master.getTicketMasterId());
+            for (TicketDetails ticketDetails : details) {
+                ticketDetails.setPaidStatus(1);
+                ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
+            }
+            eventId = master.getEventId();
+            master.setPaymentReceived(1);
+            master.setPaymentReceivedBy(user.getUserId());
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            master.setPaymentReceivedAt(dtf.format(LocalDateTime.now()));
+            ticketMasterService.updateTicketMaster(master);
+            HashMap<String, Object> pricingDescMap = new HashMap<>();
+            for(TicketDetails detail : details) {
+                String pricingDesc = eventPricingService.findEventPricingById(detail.getPricingOptionId()).getPricingDesc();
+                pricingDescMap.put(detail.getPricingOptionName(), pricingDesc);
+            }
+            Event event = eventService.findEventById(master.getEventId());
+            model.addAttribute("descMap", pricingDescMap);
+            model.addAttribute("event", event);
+            model.addAttribute("ticket", master);
+            model.addAttribute("details", details);
+            emailService.sendTicketEmail(master.getEmail(), model);
+
+
+            // Add a flash attribute to signal a successful update
+            redirectAttributes.addFlashAttribute("message", "Payment for " + master.getFullName() + " received successfully!");
+        }
+
+        // Pass the eventId as a query parameter in the redirect
+        if (eventId != null && !eventId.isEmpty()) {
+            redirectAttributes.addAttribute("eventId", eventId);
+        }
+        
+        return "redirect:/payment_list";
+    }
+
+    @GetMapping("/tickets/undo/{masterId}")
+    public String undoPayment(@PathVariable String masterId, RedirectAttributes redirectAttributes) {
+        TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
+        String eventId = "";
+
+        if (master != null) {
+            eventId = master.getEventId();
+            List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(master.getTicketMasterId());
+            for(TicketDetails detail : details) {
+                detail.setPaidStatus(0);
+                ticketDetailsService.addOrUpdateTicketDetails(detail);
+            }
+            master.setPaymentReceived(0);
+            master.setPaymentReceivedBy(null);
+            master.setPaymentReceivedAt(null);
+            ticketMasterService.updateTicketMaster(master);
+            redirectAttributes.addFlashAttribute("message", "Payment for " + master.getFullName() + " undone.");
+        }
+
+        if (eventId != null && !eventId.isEmpty()) {
+            redirectAttributes.addAttribute("eventId", eventId);
+        }
+
+        return "redirect:/payment_list";
+    }
+
+    @GetMapping("/tickets/delete/{masterId}")
+    public String deleteTicket(@PathVariable String masterId, RedirectAttributes redirectAttributes) {
+        TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
+        String eventId = "";
+
+        if (master != null) {
+            eventId = master.getEventId();
+            List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(master.getTicketMasterId());
+            for(TicketDetails detail : details) {
+                ticketDetailsService.deleteTicketDetails(detail.getDetailId());
+            }
+            ticketMasterService.deleteTicketMaster(masterId);
+            redirectAttributes.addFlashAttribute("message", "Ticket for " + master.getFullName() + " deleted.");
+        }
+
+        if (eventId != null && !eventId.isEmpty()) {
+            redirectAttributes.addAttribute("eventId", eventId);
+        }
+
         return "redirect:/payment_list";
     }
 
@@ -258,21 +366,5 @@ public class TicketMasterController {
         Random rnd = new Random();
         int number = rnd.nextInt(999999);
         return number;
-    }
-
-    @GetMapping("/tickets/undo/{ticketMasterId}")
-    public String undoPayment(@PathVariable String ticketMasterId, Model model) {
-        TicketMaster ticket = ticketMasterService.findTicketMasterById(ticketMasterId);
-        List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(ticket.getTicketMasterId());
-        for(TicketDetails detail : details) {
-            detail.setPaidStatus(0);
-            ticketDetailsService.addOrUpdateTicketDetails(detail);
-        }
-        ticket.setPaymentReceived(0);
-        ticket.setPaymentReceivedBy("null");
-        ticket.setPaymentReceivedAt("null");
-        ticketMasterService.updateTicketMaster(ticket);
-
-        return "redirect:/payment_list";
     }
 }

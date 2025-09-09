@@ -369,152 +369,26 @@ public class SignInController {
         }
     }
 
-    @GetMapping("/payment/{masterId}")
-    public String confirmPayment(@PathVariable String masterId, Model model, HttpServletRequest request) {
-        TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
-
-        String authToken = null;
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for(var cookie : cookies) {
-                if(cookie.getName().equals("authToken")) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
-        var user = new User();
-        if(authToken != null) {
-            if(userService.validateToken(authToken)) {
-                user = userService.getUserByToken(authToken).get();
-                model.addAttribute("loggedInUser", user);
-            } else {
-                return "redirect:/signin";
-            }
-        } else {
-            return "redirect:/signin";
-        }
-
-
-        List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(master.getTicketMasterId());
-        for (TicketDetails ticketDetails : details) {
-            ticketDetails.setPaidStatus(1);
-            ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
-        }
-        Event event = eventService.findEventById(master.getEventId());
-        master.setPaymentReceived(1);
-        master.setPaymentReceivedBy(user.getUserId());
-        master.setPaymentReceivedAt(new Date().toString());
-        model.addAttribute("ticket", master);
-        model.addAttribute("event", event);
-        model.addAttribute("details", details);
-        HashMap<String, Object> pricingDescMap = new HashMap<>();
-        for(TicketDetails detail : details) {
-            String pricingDesc = eventPricingService.findEventPricingById(detail.getPricingOptionId()).getPricingDesc();
-            pricingDescMap.put(detail.getPricingOptionName(), pricingDesc);
-        }
-        model.addAttribute("descMap", pricingDescMap);
-        emailService.sendTicketEmail(master.getEmail(), model);
-
-        ticketMasterService.updateTicketMaster(master);
-
-        return "redirect:/payment_list";
-    }
-
-    @GetMapping("/payment/all/{eventId}")
-    public String sendPaymentReminder(@PathVariable String eventId, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes) {
-        String authToken = null;
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for(var cookie : cookies) {
-                if(cookie.getName().equals("authToken")) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
-        var user = new User();
-        if(authToken != null) {
-            if(userService.validateToken(authToken)) {
-                user = userService.getUserByToken(authToken).get();
-                model.addAttribute("loggedInUser", user);
-            } else {
-                return "redirect:/signin";
-            }
-        } else {
-            return "redirect:/signin";
-        }
-
-        Event event = eventService.findEventById(eventId);
-
-        List<TicketMaster> masters = ticketMasterService.findTicketMasterByEventId(eventId);
-        model.addAttribute("event", event);
-        for (TicketMaster master : masters) {
-            if (master.getPaymentReceived() == 0) {
-                emailService.sendPaymentReminder(master.getTicketMasterId(), eventId);
-            }
-        }
-        redirectAttributes.addFlashAttribute("message", "Payment reminder emails sent to all!");
-        return "redirect:/event_list";
-    }
-
-    @GetMapping("/checkin")
-    public String getAllTicketDetails(Model model, HttpServletRequest request, HttpServletResponse response) {
-        List<TicketDetails> details = ticketDetailsService.findAllTicketDetails();
-        model.addAttribute("details", details);
-        Map<String, User> users = new HashMap<>();
-        for(TicketDetails detail : details) {
-            if (detail.getCheckedIn() == 1) {
-                Optional<User> user = userService.getUserByUserId(detail.getCheckedInBy());
-                if (user.isPresent()) {
-                    users.put(detail.getCheckedInBy(), user.get());
-                }
-            }
-        }
-        model.addAttribute("users", users);
-
-        String authToken = null;
-        String message = null;
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for(var cookie : cookies) {
-                if(cookie.getName().equals("authToken")) {
-                    authToken = cookie.getValue();
-                }
-                if(cookie.getName().equals("message")) {
-                    try {
-                        String decodedMessage = URLDecoder.decode(cookie.getValue(), "UTF-8");
-                        message = decodedMessage;
-                        Cookie msgCookie = new Cookie("message", null);
-                        msgCookie.setMaxAge(0);
-                        response.addCookie(msgCookie);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-
-        if(message != null) {
-            model.addAttribute("message", message);
-        }
-        var user = new User();
-        if(authToken != null) {
-            if(userService.validateToken(authToken)) {
-                user = userService.getUserByToken(authToken).get();
-                model.addAttribute("loggedInUser", user);
-            } else {
-                return "redirect:/signin";
-            }
-        } else {
-            return "redirect:/signin";
-        }
-        return "/checkin_list";
-    }
+    /*
+     * REMOVE THE ENTIRE METHOD BELOW.
+     * This method conflicts with the receivePayment method in TicketMasterController.
+     * The logic has been consolidated there.
+     */
+    // @GetMapping("/payment/{masterId}")
+    // public String confirmPayment(@PathVariable("masterId") String masterId, Model model, HttpServletRequest request) {
+    //     TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
+    //     master.setPaymentReceived(1);
+    //     HttpSession session = request.getSession();
+    //     String userId = (String) session.getAttribute("userId");
+    //     master.setPaymentReceivedBy(userId);
+    //     DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+    //     master.setPaymentReceivedAt(dtf.format(LocalDateTime.now()));
+    //     ticketMasterService.addOrUpdateTicketMaster(master);
+    //     return "redirect:/payment_list";
+    // }
 
     @PostMapping("/confirmCheckIn")
-    public String confirmCheckIn(@RequestParam(value = "ticketIds", required = false) List<String> ticketIds, Model model, HttpServletRequest request, HttpServletResponse response) {
+    public String confirmCheckIn(@RequestParam("ticketId") String ticketId, HttpServletRequest request) {
         String authToken = null;
 
         Cookie[] cookies = request.getCookies();
@@ -529,7 +403,7 @@ public class SignInController {
         if(authToken != null) {
             if(userService.validateToken(authToken)) {
                 user = userService.getUserByToken(authToken).get();
-                model.addAttribute("loggedInUser", user);
+                request.getSession().setAttribute("loggedInUser", user);
             } else {
                 return "redirect:/signin";
             }
@@ -538,118 +412,93 @@ public class SignInController {
         }
 
 
-        if (ticketIds == null || ticketIds.isEmpty()) {
-            try {
-            String encodedMessage = URLEncoder.encode("No Tickets were selected!", "UTF-8");
-            Cookie msgCookie = new Cookie("message", encodedMessage);
-            msgCookie.setHttpOnly(true);
-            msgCookie.setSecure(false);
-            msgCookie.setPath("/");
-            response.addCookie(msgCookie);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return "redirect:/checkin";
+        Optional<TicketDetails> details = ticketDetailsService.findTicketDetailsByDetailsId(ticketId);
+
+        if (details.isPresent()) {
+            TicketDetails ticketDetails = details.get();
+            ticketDetails.setCheckedIn(1);
+            ticketDetails.setCheckedInBy(user.getUserId());
+            ticketDetails.setCheckedInAt(new Date().toString());
+            ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
         }
 
-        for (String ticketId : ticketIds) {
-            Optional<TicketDetails> details = ticketDetailsService.findTicketDetailsByDetailsId(ticketId);
-
-            if (details.isPresent()) {
-                TicketDetails ticketDetails = details.get();
-                ticketDetails.setCheckedIn(1);
-                ticketDetails.setCheckedInBy(user.getUserId());
-                ticketDetails.setCheckedInAt(new Date().toString());
-                ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
-            }
-        }
-        try {
-            String encodedMessage = URLEncoder.encode("Tickets Checked In!", "UTF-8");
-            Cookie msgCookie = new Cookie("message", encodedMessage);
-            msgCookie.setHttpOnly(true);
-            msgCookie.setSecure(false);
-            msgCookie.setPath("/");
-            response.addCookie(msgCookie);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return "redirect:/checkin";
+        return "redirect:/checkin_list";
     }
 
-@GetMapping("/event/stats/{eventId}")
-public String getEventStats(@PathVariable String eventId, Model model, HttpServletRequest request) {
-    Event event = eventService.findEventById(eventId);
-    if (event == null) {
-        return "redirect:/event_list";
-    }
+    @GetMapping("/event/stats/{eventId}")
+    public String getEventStats(@PathVariable String eventId, Model model, HttpServletRequest request) {
+        Event event = eventService.findEventById(eventId);
+        if (event == null) {
+            return "redirect:/event_list";
+        }
 
-    if (event.getEventType().equals("free") && event.getRsvpYes() != null && event.getRsvpYes().equals("yes")) {
-        List<TicketMaster> rsvps = ticketMasterService.findTicketMasterByEventId(eventId);
-        int totalRsvp = 0;
-        int checkedIn = 0;
-        Map<String, Integer> rsvpMap = new HashMap<>();
+        if (event.getEventType().equals("free") && event.getRsvpYes() != null && event.getRsvpYes().equals("yes")) {
+            List<TicketMaster> rsvps = ticketMasterService.findTicketMasterByEventId(eventId);
+            int totalRsvp = 0;
+            int checkedIn = 0;
+            Map<String, Integer> rsvpMap = new HashMap<>();
 
-        for (TicketMaster rsvp : rsvps) {
-            if (rsvp.isRsvp()) {
-                totalRsvp += rsvp.getRsvpCount();
-                String key = rsvp.getFullName() + " (" + rsvp.getEmail() + ")";
-                rsvpMap.put(key, rsvp.getRsvpCount());
-                // Count checked in from ticket details
-                List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(rsvp.getTicketMasterId());
-                for (TicketDetails detail : details) {
-                    if (detail.getCheckedIn() == 1) {
-                        checkedIn++;
+            for (TicketMaster rsvp : rsvps) {
+                if (rsvp.isRsvp()) {
+                    totalRsvp += rsvp.getRsvpCount();
+                    String key = rsvp.getFullName() + " (" + rsvp.getEmail() + ")";
+                    rsvpMap.put(key, rsvp.getRsvpCount());
+                    // Count checked in from ticket details
+                    List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(rsvp.getTicketMasterId());
+                    for (TicketDetails detail : details) {
+                        if (detail.getCheckedIn() == 1) {
+                            checkedIn++;
+                        }
                     }
                 }
             }
+
+            model.addAttribute("isRsvpEvent", true);
+            model.addAttribute("totalRsvp", totalRsvp);
+            model.addAttribute("totalCheckedIn", checkedIn);
+            model.addAttribute("rsvpMap", rsvpMap);
+            model.addAttribute("event", event);
+            return "event_stats";
         }
 
-        model.addAttribute("isRsvpEvent", true);
-        model.addAttribute("totalRsvp", totalRsvp);
-        model.addAttribute("totalCheckedIn", checkedIn);
-        model.addAttribute("rsvpMap", rsvpMap);
+        // For paid events
+        List<TicketDetails> details = ticketDetailsService.findByEventId(eventId);
         model.addAttribute("event", event);
+        model.addAttribute("isRsvpEvent", false);
+        model.addAttribute("totalTickets", details.size());
+        double amount = 0;
+        double paid = 0;
+        int checkedIn = 0;
+        Map<String, Integer> pricingCounts = new HashMap<>();
+        Map<String, Double> paymentsReceivedCounts = new HashMap<>();
+        Map<String, Double> pricingMoney = new HashMap<>();
+        Map<String, Integer> checkInCount = new HashMap<>();
+        boolean noPaymentReceived = true;
+        for (TicketDetails detail : details) {
+            amount += detail.getAmount();
+            if (detail.getPaidStatus() == 1) {
+                paid += detail.getAmount();
+                noPaymentReceived = false;
+            }
+            if (detail.getCheckedIn() == 1) {
+                checkedIn++;
+            }
+            String pricingOption = detail.getPricingOptionName();
+            pricingCounts.put(pricingOption, pricingCounts.getOrDefault(pricingOption, 0) + 1);
+            paymentsReceivedCounts.put(pricingOption, paymentsReceivedCounts.getOrDefault(pricingOption, 0.0) + detail.getAmount());
+            pricingMoney.put(pricingOption, pricingMoney.getOrDefault(pricingOption, 0.0) + detail.getAmount());
+            checkInCount.put(pricingOption, checkInCount.getOrDefault(pricingOption, 0) + (detail.getCheckedIn() == 1 ? 1 : 0));
+        }
+
+        model.addAttribute("totalAmount", amount);
+        model.addAttribute("totalPaid", paid);
+        model.addAttribute("totalCheckedIn", checkedIn);
+        model.addAttribute("pricingCounts", pricingCounts);
+        model.addAttribute("receiveTotal", paymentsReceivedCounts);
+        model.addAttribute("totalAmountTypes", pricingMoney);
+        model.addAttribute("checkInTypes", checkInCount);
         return "event_stats";
     }
-
-    // For paid events
-    List<TicketDetails> details = ticketDetailsService.findByEventId(eventId);
-    model.addAttribute("event", event);
-    model.addAttribute("isRsvpEvent", false);
-    model.addAttribute("totalTickets", details.size());
-    double amount = 0;
-    double paid = 0;
-    int checkedIn = 0;
-    Map<String, Integer> pricingCounts = new HashMap<>();
-    Map<String, Double> paymentsReceivedCounts = new HashMap<>();
-    Map<String, Double> pricingMoney = new HashMap<>();
-    Map<String, Integer> checkInCount = new HashMap<>();
-    boolean noPaymentReceived = true;
-    for (TicketDetails detail : details) {
-        amount += detail.getAmount();
-        if (detail.getPaidStatus() == 1) {
-            paid += detail.getAmount();
-            noPaymentReceived = false;
-        }
-        if (detail.getCheckedIn() == 1) {
-            checkedIn++;
-        }
-        String pricingOption = detail.getPricingOptionName();
-        pricingCounts.put(pricingOption, pricingCounts.getOrDefault(pricingOption, 0) + 1);
-        paymentsReceivedCounts.put(pricingOption, paymentsReceivedCounts.getOrDefault(pricingOption, 0.0) + detail.getAmount());
-        pricingMoney.put(pricingOption, pricingMoney.getOrDefault(pricingOption, 0.0) + detail.getAmount());
-        checkInCount.put(pricingOption, checkInCount.getOrDefault(pricingOption, 0) + (detail.getCheckedIn() == 1 ? 1 : 0));
-    }
-
-    model.addAttribute("totalAmount", amount);
-    model.addAttribute("totalPaid", paid);
-    model.addAttribute("totalCheckedIn", checkedIn);
-    model.addAttribute("pricingCounts", pricingCounts);
-    model.addAttribute("receiveTotal", paymentsReceivedCounts);
-    model.addAttribute("totalAmountTypes", pricingMoney);
-    model.addAttribute("checkInTypes", checkInCount);
-    return "event_stats";
-}
     @GetMapping("/participant_list")
     public String getAllParticipants(@RequestParam(value = "eventId", required = false) String eventId, Model model, HttpServletRequest request) {
         List<Participation> participants = participationService.getAllParticipation();

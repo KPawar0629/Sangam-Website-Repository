@@ -17,102 +17,102 @@
     </style>
 </head>
 <body>
-<#include "nav.ftl">
-<link href="./css/style.css" rel="stylesheet" type="text/css"/>
-<main>
-<div id="main-content">
-    <div class="container mt-3">
-        <div class="row mb-3">
-            <h3 class="col-12 col-md-7">Check In Tickets</h3>
-            <div class="col-12 col-md-2">
-                <button id="toggleButton" class="btn btn-success">Show All</button>
-            </div>
-            <div class="col-12 col-md-3">
-                <div class="input-group mb-3">
-                    <span class="input-group-text" id="basic-addon1">&#128270</span>
-                    <input class="form-control" type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Enter search text here...">
+<div class="d-flex flex-column min-vh-100">
+    <#include "nav.ftl">
+    <link href="/css/style.css" rel="stylesheet" type="text/css"/>
+    <main class="flex-grow-1">
+        <div id="main-content">
+            <div class="container mt-3">
+                <div class="row mb-3">
+                    <h3 class="col-12 col-md-7">Check In Tickets</h3>
+                    <div class="col-12 col-md-2">
+                        <button id="toggleButton" class="btn btn-success">Show All</button>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="basic-addon1">&#128270</span>
+                            <input class="form-control" type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Enter search text here...">
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <form action="/confirmCheckIn" method="post" id="checkInForm">
-            <div>
-                <div class="row d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary mb-3">Check In Selected</button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-striped table-bordered" id="myTable">
-                        <thead>
-                        <tr>
-                            <th>Check In</th>
-                            <th>Name</th>
-                            <th>Ticket Code</th>
-                            <th>Ticket Type</th>
-                            <th class="hide-on-md">CheckIn By</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <#list details as detail>
-                                <#if detail.paidStatus == 0>
-                                <tr class="toggle-row d-none">
-                                    <td><button type="button" class="btn btn-danger" disabled>&dollar;</button></td>
-                                <#elseif detail.checkedIn == 1>
-                                <tr class="toggle-row d-none">
-                                    <td><button type="button" class="btn btn-success" disabled>&check;</button> </td>
-                                <#else>
+                <form action="/confirmCheckIn" method="post" id="checkInForm">
+                    <div>
+                        <div class="row d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary mb-3">Check In Selected</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered" id="myTable">
+                                <thead>
                                 <tr>
-                                    <td>
-                                        <div>
-                                            <input type="checkbox" name="ticketIds" value="${detail.detailId}" class="btn-check" id="check_${detail.detailId}" autocomplete="off">
-                                            <label for="check_${detail.detailId}" class="btn btn-outline-primary">&#9678;</label>
-                                        </div>
-                                    </td>
-                                </#if>
-                                <td>${detail.fullName}</td>
-                                <td>${detail.getUniqueCode()}</td>
-                                <td>${detail.pricingOptionName}</td>
-                                <#if detail.checkedInBy?? && users[detail.checkedInBy]??>
-                                <td class="hide-on-md">${users[detail.checkedInBy].fullName}</td>
-                                <#else>
-                                <td class="hide-on-md"></td>
-                                </#if>
-                            </tr>
-                        </#list>
-                        </tbody>
-                    </table>
+                                    <th>Check In</th>
+                                    <th>Name</th>
+                                    <th>Ticket Code</th>
+                                    <th>Ticket Type</th>
+                                    <th class="hide-on-md">CheckIn By</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <#list details as detail>
+                                        <#if detail.paidStatus == 0>
+                                        <tr class="toggle-row d-none">
+                                            <td><button type="button" class="btn btn-danger" disabled>&dollar;</button></td>
+                                        <#elseif detail.checkedIn == 1>
+                                        <tr class="toggle-row d-none">
+                                            <td><button type="button" class="btn btn-success" disabled>&check;</button> </td>
+                                        <#else>
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <input type="checkbox" name="ticketIds" value="${detail.detailId}" class="btn-check" id="check_${detail.detailId}" autocomplete="off">
+                                                    <label for="check_${detail.detailId}" class="btn btn-outline-primary">&#9678;</label>
+                                                </div>
+                                            </td>
+                                            <td>${detail.fullName}</td>
+                                            <td>${detail.getUniqueCode()}</td>
+                                            <td>${detail.pricingOptionName}</td>
+                                            <#if detail.checkedInBy?? && users[detail.checkedInBy]??>
+                                            <td class="hide-on-md">${users[detail.checkedInBy].fullName}</td>
+                                            <#else>
+                                            <td class="hide-on-md"></td>
+                                            </#if>
+                                        </tr>
+                                    </#list>
+                                    </tbody>
+                                </table>
 
-                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
             </div>
-        </form>
+        </div>
+    </main>
 
-    </div>
-</div>
-</main>
-
-<#if message??>
-    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="messageModalLabel">Notification</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>${message}</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <#if message??>
+        <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="messageModalLabel">Notification</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>${message}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</#if>
+    </#if>
 
-
-<footer class="bg-dark text-white text-center py-3">
-    <p>2025 Sangam &copy;. All Rights reserved.</p>
-</footer>
-
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
+    </footer>
+</div>
 <script>
     function searchFunction() {
         // Declare variables
@@ -173,6 +173,5 @@
 
     
 </script>
-
 </body>
 </html>

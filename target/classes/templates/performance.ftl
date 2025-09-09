@@ -11,10 +11,11 @@
     
 </head>
 <body>
-<#include "nav.ftl">
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<link href="/css/style.css" rel="stylesheet">
-<div class="container">
+<div class="d-flex flex-column min-vh-100">
+    <#include "nav.ftl">
+    <link href="/css/style.css" rel="stylesheet">
+    <main class="container flex-grow-1">
+    <div class="container">
     <#if event.eventId??>
     <form action="/performance/new/${event.eventId}" method="post" class="mb-5" id="performance-form">
         <input type="text" class="form-control" id="checkHidden" placeholder="John Smith" name="checkHidden" required hidden>
@@ -116,10 +117,11 @@
         </div>
     </#if>
 </div>
-
-<footer class="bg-dark text-white text-center py-3">
-    <p>2025 Sangam &copy;. All Rights reserved.</p>
-</footer>
+    </main>
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
+    </footer>
+</div>
 <script>
 function onSubmit() {
     var submitButton = document.getElementById('submitButton');

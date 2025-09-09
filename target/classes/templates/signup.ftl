@@ -9,47 +9,52 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
-<#include "nav.ftl">
-<link href="./css/style.css" rel="stylesheet" type="text/css"/>
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <form class="row signin-form signup-form mb-5" action="/signup" method="post" autocomplete="off" id="registration_form">
-                <h4 class="text-center mb-3">Register</h4>
+<div class="d-flex flex-column min-vh-100">
+    <#include "nav.ftl">
+    <main class="flex-grow-1">
+        <div class="registration-container">
+            <link href="./css/style.css" rel="stylesheet" type="text/css"/>
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <form class="row signin-form signup-form mb-5" action="/signup" method="post" autocomplete="off" id="registration_form">
+                            <h4 class="text-center mb-3">Register</h4>
 
-                <div class="col-md-6">
-                    <label for="inputName" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="inputName" placeholder="ex: John Smith" name="name" value="${name!}" required><br>
-                    <label for="inputEmail" class="form-label">Email Address</label>
-                    <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" name="email" placeholder="ex: JohnSmith@gmail.com" value="${email!}" required><br>
-                    <label for="inputPhone" class="form-label">Phone Number</label>
-                    <input type='tel' name='phone' placeholder='1234567890' id="inputPhone" minlength="10" maxlength="10" class="form-control" value="${phone!}" required ><br>
-                </div>
-                <div class="col-md-1 d-flex align-items-center justify-content-center">
-                    <div class="vertical-line"></div>
-                </div>
-                <div class="col-md-5">
-                    <label for="inputPassword" class="form-label">Password</label>
-                    <input type="password" class="form-control" id="inputPassword" name="password" placeholder="ex: JohnSmith@123" value="${password!}"><br>
-                    <label for="inputConfirm" class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" id="inputConfirm" placeholder="ex: JohnSmith@123" value="${password!}"><br>
-                    <label for="inputSecCode" class="form-label">Input Sangam Security Code</label>
-                    <input type="password" class="form-control" id="inputSecCode" name="code"><br>
+                            <div class="col-md-6">
+                                <label for="inputName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="inputName" placeholder="ex: John Smith" name="name" value="${name!}" required><br>
+                                <label for="inputEmail" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp" name="email" placeholder="ex: JohnSmith@gmail.com" value="${email!}" required><br>
+                                <label for="inputPhone" class="form-label">Phone Number</label>
+                                <input type='tel' name='phone' placeholder='1234567890' id="inputPhone" minlength="10" maxlength="10" class="form-control" value="${phone!}" required ><br>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-center justify-content-center">
+                                <div class="vertical-line"></div>
+                            </div>
+                            <div class="col-md-5">
+                                <label for="inputPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="inputPassword" name="password" placeholder="ex: JohnSmith@123" value="${password!}"><br>
+                                <label for="inputConfirm" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="inputConfirm" placeholder="ex: JohnSmith@123" value="${password!}"><br>
+                                <label for="inputSecCode" class="form-label">Input Sangam Security Code</label>
+                                <input type="password" class="form-control" id="inputSecCode" name="code"><br>
 
-                    <span id="warningText" class="text-danger mb-3"></span><br>
-                    <span class="text-danger mb-3">${error!}</span><br>
+                                <span id="warningText" class="text-danger mb-3"></span><br>
+                                <span class="text-danger mb-3">${error!}</span><br>
 
-                    <a href="/signin" class="form-text">Already have an account?</a><br>
-                    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                                <a href="/signin" class="form-text">Already have an account?</a><br>
+                                <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
-</div>
-
-<footer class="bg-dark text-white text-center py-3">
-        <p>2025 Sangam &copy;. All Rights reserved.</p>    
+    </main>
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
     </footer>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 

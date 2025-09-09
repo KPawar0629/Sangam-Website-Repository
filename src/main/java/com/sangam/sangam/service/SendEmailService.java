@@ -146,17 +146,20 @@ public class SendEmailService {
         try {
             Event event = (Event) model.getAttribute("event");
             String emailSubject = event.getEventName() + " Ticket Payment Received!";
-
+            System.out.println("Sending ticket email!");
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            System.out.println("Sending ticket email! 2");
 
             helper.setFrom(fromEmailId);
             helper.setTo(recipient);
             helper.setSubject(emailSubject);
+            System.out.println("Sending ticket email! 3");
 
             Map<String, Object> modelMap = model.asMap();
             String htmlBody = getFreeMarkerTemplateContent("email_tickets.ftl", modelMap);
             System.out.println("Back from template now!");
+            System.out.println("Sending ticket email! 4");
 
             helper.setText(htmlBody, true);
             mailSender.send(mimeMessage);

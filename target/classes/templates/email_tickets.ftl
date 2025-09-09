@@ -1,50 +1,65 @@
 <html>
-    <div>
-        <p style="font-size: 22px"><strong>Dear ${ticket.fullName},</strong></p>
-        <p>We received payments for your tickets. Below are the ticket details. DO NOT share ticket code with anyone. Ticket codes will be used to check you in at the registration desk on the event day.</p>
-
-        <p><strong><span style="font-size:18px">Event details:</span></strong></p>
-        <p><strong>Event name:</strong> ${event.eventName}<br><strong>Event date:</strong> ${event.eventDateTime}<br><strong>Venue:</strong> ${event.eventLocation}<br></p>
-
-        <p><strong><span style="font-size:18px">Your tickets:</span></strong></p>
-
-        <table style="border-collapse: collapse; border: 2px dashed black;">
-            <thead>
-            <tr>
-                <th style="border: 2px dashed black;">Ticket No.</th>
-                <th style="border: 2px dashed black;">Ticket Type</th>
-                <th style="border: 2px dashed black;">Ticket Code</th>
-            </tr>
-            </thead>
-            <tbody>
-        <#list details as detail>
-            
-            <tr>
-            <td style="border: 2px dashed black;">Ticket #${(detail_index +1)}</td>
-            <td style="border: 2px dashed black;">${detail.pricingOptionName}<br>${descMap[detail.pricingOptionName]}</td>
-            <td style="border: 2px dashed black;">${detail.uniqueCode}</td>
-            </tr>                        
-        </#list>
-            </tbody>
-        </table>
-
-        <p>Total Amount: $${ticket.totalAmount}</p>
-
-        <p><strong>Disclaimer:</strong><br>
-All Sales are FINAL.<br>
-
-All tickets are NON-REFUNDABLE and NON-TRANSFERABLE.<br>
-<br>
-
-<strong>Liability Waiver:</strong><br><br>
-By purchasing this ticket, you agree to attend the event at your own risk. The organizers, volunteers, and venue management shall not be held responsible for any injury, loss, theft, damage to personal property, or other incidents that may occur before, during, or after the event.<br><br>
-
-Attendees are responsible for their own safety and belongings. Children must be supervised by a parent or guardian at all times.<br>
-
-</p>
-
-        <p><strong>Team Sangam</strong></p>
-        
-        
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+  <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden;">
+    
+    <div style="padding: 20px 30px; background-color: #4a5568; color: #ffffff; text-align: center;">
+        <h1 style="margin: 0; font-size: 24px;">Your Event Tickets</h1>
     </div>
+
+    <div style="padding: 30px;">
+      <p style="font-size: 18px; color: #333333; margin-bottom: 25px;"><strong>Dear ${ticket.fullName},</strong></p>
+
+      <p style="font-size: 16px; color: #555555; line-height: 1.6;">We have received payment for your tickets. Below are your ticket details. <strong>DO NOT share these ticket codes with anyone.</strong> They will be used to check you in at the registration desk on the event day.</p>
+      
+      <h2 style="font-size: 20px; color: #333333; border-bottom: 2px solid #eeeeee; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;">Event Details</h2>
+      <p style="font-size: 16px; color: #555555; line-height: 1.7;">
+        <strong>Event:</strong> ${event.eventName}<br>
+        <strong>Date:</strong> ${event.eventDateTime}<br>
+        <strong>Venue:</strong> ${event.eventLocation}<br>
+      </p>
+      
+      <h2 style="font-size: 20px; color: #333333; border-bottom: 2px solid #eeeeee; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;">Your Tickets</h2>
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+          <tr>
+            <th style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 14px; color: #333;">Ticket No.</th>
+            <th style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 14px; color: #333;">Ticket Type</th>
+            <th style="background-color: #f8f9fa; border: 1px solid #dee2e6; padding: 12px; text-align: left; font-size: 14px; color: #333;">Ticket Code</th>
+          </tr>
+        </thead>
+        <tbody>
+      <#list details as detail>
+          <tr>
+            <td style="border: 1px solid #dee2e6; padding: 12px; font-size: 16px;">Ticket #${(detail_index +1)}</td>
+            <td style="border: 1px solid #dee2e6; padding: 12px; font-size: 16px;">
+                <strong>${detail.pricingOptionName}</strong>
+                <#if descMap[detail.pricingOptionName]?? && descMap[detail.pricingOptionName]?has_content>
+                    <br><span style="font-size: 13px; color: #6c757d;">${descMap[detail.pricingOptionName]}</span>
+                </#if>
+            </td>
+            <td style="border: 1px solid #dee2e6; padding: 12px; font-size: 16px; font-family: 'Courier New', Courier, monospace;"><strong>${detail.uniqueCode}</strong></td>
+          </tr>                        
+      </#list>
+        </tbody>
+      </table>
+      <div style="text-align: right; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 6px;">
+        <strong style="font-size: 20px; color: #28a745;">Total Amount: $${ticket.totalAmount}</strong>
+      </div>
+
+      <div style="margin-top: 30px; padding: 20px; background-color: #fffbe6; border-left: 4px solid #ffc107; font-size: 15px; color: #555555; line-height: 1.6;">
+        <h3 style="font-size: 18px; color: #333333; margin-top: 0; margin-bottom: 15px;">Disclaimer & Liability Waiver</h3>
+        <p style="margin: 0 0 10px 0;">All sales are FINAL. All tickets are NON-REFUNDABLE and NON-TRANSFERABLE.</p>
+        <p style="margin: 0 0 10px 0;">By purchasing this ticket, you agree to attend the event at your own risk. The organizers, volunteers, and venue management shall not be held responsible for any injury, loss, theft, damage to personal property, or other incidents that may occur before, during, or after the event.</p>
+        <p style="margin: 0;">Attendees are responsible for their own safety and belongings. Children must be supervised by a parent or guardian at all times.</p>
+      </div>
+
+      <p style="margin-top: 30px; font-size: 16px; color: #555555;"><strong>Team Sangam</strong></p> 
+    </div>
+
+    <div style="background-color:#f1f1f1; border-top: 1px solid #dddddd; padding: 20px 30px; text-align: center;">
+      <p style="margin: 0; font-size: 14px; color: #666666;"><strong>Need help or have questions?</strong> <a href="mailto:inception.kaustubh@gmail.com" target="_blank" style="color: #007bff; text-decoration: none;">
+            Contact the event organizer</a></p>
+    </div>
+  </div>
+</body>
 </html>
