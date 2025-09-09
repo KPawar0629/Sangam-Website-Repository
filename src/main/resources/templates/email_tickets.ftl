@@ -57,7 +57,7 @@
     </div>
 
     <div style="background-color:#f1f1f1; border-top: 1px solid #dddddd; padding: 20px 30px; text-align: center;">
-      <p style="margin: 0; font-size: 14px; color: #666666;"><strong>Need help or have questions?</strong> <a href="mailto:inception.kaustubh@gmail.com" target="_blank" style="color: #007bff; text-decoration: none;">
+      <p style="margin: 0; font-size: 14px; color: #666666;"><strong>Need help or have questions?</strong> <a href="mailto:sbdesis@gmail.com" target="_blank" style="color: #007bff; text-decoration: none;">
             Contact the event organizer</a></p>
     </div>
   </div>

@@ -1,8 +1,8 @@
 spring:
   data:
     mongodb:
-      uri: mongodb+srv://kaust:Coolkid%400629@cluster0.v84kg.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-      database: authenticationDB
+      uri: mongodb+srv://sbdesis:Desibandhu%402024%21@sangamwebappfree.clugh.mongodb.net/?retryWrites=true&w=majority&appName=SangamWebApp
+      database: SangamWebDB
 
   freemarker:
     template-loader-path: classpath:/templates

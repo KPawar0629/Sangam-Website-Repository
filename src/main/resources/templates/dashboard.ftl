@@ -17,8 +17,8 @@
 <div class="d-flex flex-column min-vh-100">
     <#include "nav.ftl">
     <link href="/css/style.css" rel="stylesheet" type="text/css"/>
-    <main class="flex-grow-1">
-        <div class="cont">
+    <main>
+        <div class="cont flex-grow-1">
             <div class="item left">
                 <img src="/imgs/logo1.png" class="rounded-2 main-logo">
             </div>
@@ -175,10 +175,11 @@
         </div>
     </#if>
 
-    <footer class="bg-dark text-white text-center py-3 mt-auto">
+    
+</div>
+<footer class="bg-dark text-white text-center py-3 mt-auto">
         <p>2025 Sangam &copy;. All Rights reserved.</p>
     </footer>
-</div>
 <script>
     const myModal = new bootstrap.Modal('#messageModal');
     document.addEventListener('DOMContentLoaded', () => {

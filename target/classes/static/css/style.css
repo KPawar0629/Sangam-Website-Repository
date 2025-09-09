@@ -12,7 +12,6 @@
 
 .cont {
   width: 90%;
-  height: 75vh;
   display: grid;
   grid-template-rows: repeat(4, 1fr);
   grid-template-columns: repeat(4, 1fr);
@@ -320,7 +319,7 @@ footer {
   .cont {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto auto auto;
-    margin: 5% auto 100% auto;
+    margin: 5% auto; /* Use a normal margin */
     width: 90%;
   }
 
@@ -371,6 +370,35 @@ footer {
   }
 }
 
+@media screen and (max-width: 1024px) {
+    .cont {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas:
+            "main"
+            "right"
+            "left";
+    }
+
+    .item.left {
+        display: none;
+    }
+
+    .item.right {
+        /* REMOVE THE LINE BELOW */
+        /* position: absolute; */ 
+        width: 100%;
+        padding: 20px;
+        /* REMOVE THE LINES BELOW as they only apply to absolute positioning */
+        /* top: 100px; */
+        /* left: 0; */
+    }
+
+    .main-logo {
+        display: none;
+    }
+}
+
 .carousel-img,
 .main-carousel img {
   width: 70%;
@@ -408,10 +436,6 @@ footer {
   .hide-on-md {
     display: none;
   }
-
-  footer {
-    margin-top: 100% !important;
-  }
 }
 
 @media (min-width: 768px) and (max-width: 3000px) {
@@ -439,7 +463,6 @@ footer {
   color: white;
   text-align: center;
   padding: 1rem 0;
-  position: relative;
   width: 100%;
 }
 
