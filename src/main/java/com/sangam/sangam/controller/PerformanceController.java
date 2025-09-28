@@ -121,10 +121,12 @@ public class PerformanceController {
     }
 
     @GetMapping("/participation/checkin/{partiCode}")
-    public String getMethodName(@PathVariable String partiCode) {
+    public String checkInParticipant(@PathVariable String partiCode) {
         var participation = participationService.getParticipationById(partiCode);
+        String eventId = "";
         if(participation.isPresent() && !participation.isEmpty()) {
             var part = participation.get();
+            eventId = part.getEventId();
             if(part.getCheckedIn() == 0) {
                 part.setCheckedIn(1);
             } else if (part.getCheckedIn() == 1) {
@@ -132,11 +134,19 @@ public class PerformanceController {
             }
             participationService.addOrUpdateParticipation(part);
         }
+        
+        if (eventId != null && !eventId.isEmpty()) {
+            try {
+                return "redirect:/participant_list?eventId=" + URLEncoder.encode(eventId, "UTF-8");
+            } catch (java.io.UnsupportedEncodingException e) {
+                return "redirect:/participant_list";
+            }
+        }
         return "redirect:/participant_list";
     }
 
     @PostMapping("/participation/edit")
-    public String editParticipation(
+    public String editParticipant(
         @RequestParam String partiCode,
         @RequestParam String partiName,
         @RequestParam String type,
@@ -152,8 +162,10 @@ public class PerformanceController {
         @RequestParam String order) {
 
             var participation = participationService.getParticipationById(partiCode);
+            String eventId = "";
             if(participation.isPresent() && !participation.isEmpty()) {
                 var parti = participation.get();
+                eventId = parti.getEventId();
                 parti.setParticipatorName(partiName);
                 parti.setTypeOfPerformance(type);
                 parti.setWhoWillPerform(who);
@@ -174,12 +186,27 @@ public class PerformanceController {
                 participationService.addOrUpdateParticipation(parti);
             }
             
+            if (eventId != null && !eventId.isEmpty()) {
+                try {
+                    return "redirect:/participant_list?eventId=" + URLEncoder.encode(eventId, "UTF-8");
+                } catch (java.io.UnsupportedEncodingException e) {
+                    return "redirect:/participant_list";
+                }
+            }
             return "redirect:/participant_list";
     }
 
     @GetMapping("participation/details/send")
-    public String sendBulkParticipationDetails() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, MessagingException, IOException, TemplateException {
+    public String sendBulkParticipationDetails(@RequestParam(value = "eventId", required = false) String eventId) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, MessagingException, IOException, TemplateException {
         sendBulkEmailsParticipation();
+        
+        if (eventId != null && !eventId.isEmpty()) {
+            try {
+                return "redirect:/participant_list?eventId=" + URLEncoder.encode(eventId, "UTF-8");
+            } catch (java.io.UnsupportedEncodingException e) {
+                return "redirect:/participant_list";
+            }
+        }
         return "redirect:/participant_list";
     }
 

@@ -514,6 +514,7 @@ public class SignInController {
         }
 
         model.addAttribute("participants", participants);
+        model.addAttribute("selectedEventId", eventId);
 
         String authToken = null;
         Cookie[] cookies = request.getCookies();
@@ -542,9 +543,18 @@ public class SignInController {
     @GetMapping("/participation/delete/{participationId}")
     public String deleteParticipation(@PathVariable String participationId) {
         var parti = participationService.getParticipationById(participationId);
+        String eventId = "";
         if(parti.isPresent() & !parti.isEmpty()) {
+            eventId = parti.get().getEventId();
             participationService.deleteParticipation(participationId);
-            return "redirect:/participant_list";
+        }
+        
+        if (eventId != null && !eventId.isEmpty()) {
+            try {
+                return "redirect:/participant_list?eventId=" + URLEncoder.encode(eventId, "UTF-8");
+            } catch (java.io.UnsupportedEncodingException e) {
+                return "redirect:/participant_list";
+            }
         }
         return "redirect:/participant_list";
     }

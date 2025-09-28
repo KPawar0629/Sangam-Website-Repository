@@ -362,6 +362,67 @@ public class TicketMasterController {
         return "redirect:/payment_list";
     }
 
+    @GetMapping("/payment/all/{eventId}")
+    public String sendPaymentReminder(@PathVariable String eventId, RedirectAttributes redirectAttributes, HttpServletRequest request, Model model) {
+        // Authentication check
+        String authToken = null;
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(var cookie : cookies) {
+                if(cookie.getName().equals("authToken")) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+        var user = new User();
+        if(authToken != null) {
+            if(userService.validateToken(authToken)) {
+                user = userService.getUserByToken(authToken).get();
+                model.addAttribute("loggedInUser", user);
+            } else {
+                return "redirect:/signin";
+            }
+        } else {
+            return "redirect:/signin";
+        }
+
+        // Get event details
+        Event event = eventService.findEventById(eventId);
+        if (event == null) {
+            redirectAttributes.addFlashAttribute("message", "Event not found!");
+            return "redirect:/event_list";
+        }
+
+        // Get all unpaid tickets for this specific event
+        List<TicketMaster> allTickets = ticketMasterService.findTicketMasterByEventId(eventId);
+        List<TicketMaster> unpaidTickets = new ArrayList<>();
+        
+        for (TicketMaster ticket : allTickets) {
+            if (ticket.getPaymentReceived() == 0) {
+                unpaidTickets.add(ticket);
+            }
+        }
+
+        if (unpaidTickets.isEmpty()) {
+            redirectAttributes.addFlashAttribute("message", "No unpaid tickets found for " + event.getEventName());
+            return "redirect:/event_list";
+        }
+
+        // Send reminder emails to unpaid tickets
+        int emailsSent = 0;
+        for (TicketMaster ticket : unpaidTickets) {
+            try {
+                emailService.sendPaymentReminder(ticket.getTicketMasterId(), eventId);
+                emailsSent++;
+            } catch (Exception e) {
+                System.err.println("Failed to send email to: " + ticket.getEmail() + " - " + e.getMessage());
+            }
+        }
+
+        redirectAttributes.addFlashAttribute("message", "Payment reminders sent to " + emailsSent + " unpaid ticket holders for " + event.getEventName());
+        return "redirect:/event_list";
+    }
+
     public static int getRandomCode() {
         Random rnd = new Random();
         int number = rnd.nextInt(999999);

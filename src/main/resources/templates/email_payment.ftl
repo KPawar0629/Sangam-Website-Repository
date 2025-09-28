@@ -10,7 +10,7 @@
     <div style="padding: 30px;">
       <p style="font-size: 18px; color: #333333; margin-bottom: 25px;"><strong>Dear ${ticket.fullName},</strong></p>
 
-      <p style="font-size: 16px; color: #555555; line-height: 1.6;">Thank you for your reservation. We have received your payment and your tickets are confirmed. Below is a summary of your transaction.</p>
+      <p style="font-size: 16px; color: #555555; line-height: 1.6;">Thank you for your reservation. We have not yet received your payment and therefore cannot book your tickets. Look below to find instructions to pay for your tickets.</p>
       
       <#if event.notesOnTickets?has_content>
         <p style="font-size: 15px; color: #555555; line-height: 1.6; background-color: #e9f5ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0;">${event.notesOnTickets}</p>

@@ -107,12 +107,13 @@ public class SendEmailService {
     public void sendPaymentReminder(String masterId, String eventId) {
         try {
             Event event = eventService.findEventById(eventId);
+            TicketMaster ticket = ticketMasterService.findTicketMasterById(masterId);
+            List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(masterId);
+            
             String emailSubject = "Payment Reminder: " + event.getEventName() + " Tickets!";
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-            TicketMaster ticket = ticketMasterService.findTicketMasterById(masterId);
-            List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(masterId);
 
             mimeMessageHelper.setFrom(fromEmailId);
             mimeMessageHelper.setTo(ticket.getEmail());
@@ -122,6 +123,7 @@ public class SendEmailService {
             model.put("event", event);
             model.put("ticket", ticket);
             model.put("details", details);
+            
             HashMap<String, Object> pricingDescMap = new HashMap<>();
             for(TicketDetails detail : details) {
                 String pricingDesc = eventPricingService.findEventPricingById(detail.getPricingOptionId()).getPricingDesc();
@@ -129,14 +131,11 @@ public class SendEmailService {
             }
             model.put("descMap", pricingDescMap);
 
-            Template template = freemarkerConfig.getTemplate("email_payment.ftl");
-            StringWriter stringWriter = new StringWriter();
-            template.process(model, stringWriter);
-            String htmlBody = stringWriter.getBuffer().toString();
+            String htmlBody = getFreeMarkerTemplateContent("email_payment.ftl", model);
             mimeMessageHelper.setText(htmlBody, true);
             mailSender.send(mimeMessage);
 
-        } catch (IOException | TemplateException | MessagingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

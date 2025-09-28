@@ -32,6 +32,12 @@
             </div>  -->
             <div class="item main">
                 <h1 class="text-center main-text">Welcome to Sangam Santa Barbara</h1>
+                <div class="text-center mt-3 mb-4">
+                    <p class="text-muted fw-bold">
+                        SANGAM Santa Barbara Inc. is a 501(c)(3) nonprofit public charity!<br>
+                        <small>Federal Tax ID: 39-3121864</small>
+                    </p>
+                </div>
                 <div id="photoCarousel" class="carousel slide carousel-fade main-carousel mt-4" data-bs-ride="carousel">
                     <div class="carousel-inner">
                         <#--  <div class="carousel-item active" data-bs-interval="3000">
