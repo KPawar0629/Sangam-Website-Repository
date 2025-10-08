@@ -83,4 +83,8 @@ public class UserService {
             return false;
         }
     }
+    
+    public List<User> getUsersByRole(String role) {
+        return repository.findByRole(role);
+    }
 }

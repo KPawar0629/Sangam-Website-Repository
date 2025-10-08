@@ -23,10 +23,12 @@
                     <h2>All Participants</h2>
                 </div>
                 <div class="col-sm-2">
-                    <#if selectedEventId??>
-                        <a href="participation/details/send?eventId=${selectedEventId}" type="button" class="btn btn-primary" onclick="return confirm('Are you sure you want to send participation details to everyone?')">Send Participation Details</a>
-                    <#else>
-                        <a href="participation/details/send" type="button" class="btn btn-primary" onclick="return confirm('Are you sure you want to send participation details to everyone?')">Send Participation Details</a>
+                    <#if loggedInUser?? && loggedInUser.role == "admin">
+                        <#if selectedEventId??>
+                            <a href="participation/details/send?eventId=${selectedEventId}" type="button" class="btn btn-primary" onclick="return confirm('Are you sure you want to send participation details to everyone?')">Send Participation Details</a>
+                        <#else>
+                            <a href="participation/details/send" type="button" class="btn btn-primary" onclick="return confirm('Are you sure you want to send participation details to everyone?')">Send Participation Details</a>
+                        </#if>
                     </#if>
                 </div>
             </div>

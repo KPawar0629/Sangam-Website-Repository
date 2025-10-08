@@ -10,7 +10,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/6e1d51a9e9.js" crossorigin="anonymous"></script>
-
+    <style>
+        .main-logo {
+            max-width: 100%;
+            height: auto;
+        }
+        .donate-section {
+            margin-top: 15px;
+        }
+        @media (min-width: 992px) {
+            .events-heading {
+                margin-top: 35% !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -20,7 +33,15 @@
     <main>
         <div class="cont flex-grow-1">
             <div class="item left">
-                <img src="/imgs/logo1.png" class="rounded-2 main-logo">
+                <div class="d-flex flex-column align-items-center">
+                    <img src="/imgs/logo1.png" class="rounded-2 main-logo">
+                    <div class="text-center mt-4">
+                        <h4 class="mb-3 fw-bold mission-text" style="color: #e67817; font-size: 1.5rem;">Support Our Mission</h4>
+                        <a href="/donate" class="btn btn-warning px-4 py-2 fw-bold text-white" style="background-color: #e67817; border-color: #e67817;">
+                            <i class="fa-solid fa-heart me-1"></i> Donate Now
+                        </a>
+                    </div>
+                </div>
             </div>
             <#--  <div class="item left2">
                 <h5 class="h3">Community Helpful Links</h5>
@@ -32,10 +53,9 @@
             </div>  -->
             <div class="item main">
                 <h1 class="text-center main-text">Welcome to Sangam Santa Barbara</h1>
-                <div class="text-center mt-3 mb-4">
-                    <p class="text-muted fw-bold">
-                        SANGAM Santa Barbara Inc. is a 501(c)(3) nonprofit public charity!<br>
-                        <small>Federal Tax ID: 39-3121864</small>
+                <div class="text-center mb-4">
+                    <p class="text-muted fw-bold" style="font-size: 28px; margin: 5% 0 0 0; color: #000;">
+                        501(c)(3) Nonprofit Organization<br>
                     </p>
                 </div>
                 <div id="photoCarousel" class="carousel slide carousel-fade main-carousel mt-4" data-bs-ride="carousel">
@@ -56,7 +76,7 @@
                 </div>
             </div>
             <div class="item right">
-                <h5 class="h3 main-text" style="font-size: 28px; margin: 5% 0 0 0; color: #000;">Our Events</h5>
+                <h5 class="h3 main-text events-heading" style="font-size: 28px; margin: 5% 0 0 0; color: #000;">Our Events</h5>
                 <#if events?size == 0>
                     <div class="d-flex justify-content-center">
                         <div class="card border-secondary" style="width: 18rem;">

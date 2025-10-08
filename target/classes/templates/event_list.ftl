@@ -23,7 +23,9 @@
             <h2>Events</h2>
         </div>
         <div class="col-sm-4 text-end">
-            <a type="button" class="btn btn-success" href="/events/new">+ Add Event</a>
+            <#if loggedInUser?? && loggedInUser.role == "admin">
+                <a type="button" class="btn btn-success" href="/events/new">+ Add Event</a>
+            </#if>
         </div>
     </div>
     <table class="table mt-5 table-striped">
@@ -39,7 +41,11 @@
         <tbody>
             <#list events as event>
                 <tr>
+                    <#if loggedInUser?? && loggedInUser.role == "admin">
+                    <td><a href="/events/edit/${event.eventId}"  title="Edit Event">${event.eventName}</a></td>
+                    <#else>
                     <td>${event.eventName}</td>
+                    </#if>
                     <td class="d-none d-md-table-cell">
                         <#if (event.eventDescription?length > 40)>
                             ${event.eventDescription?substring(0, 40)}...
@@ -50,20 +56,32 @@
                     <td>${event.eventDateTime}</td>
                     <td>${event.status}</td>
                     <td>
-                        <a href="/events/edit/${event.eventId}"type="button" class="btn btn-primary" title="Edit Event"><i class="fa-solid fa-pen"></i></a>
                         <#if event.published == 0>
-                            <#if event.status == "Draft">
-                                <a href="/events/publish/${event.eventId}" type="button" class="btn btn-warning" onclick="return confirm('Are you ready to make ${event.eventName} open for tickets?')" title="Publish Event"><i class="fa-solid fa-paper-plane"></i></a>
-                                <a href="/events/delete/${event.getEventId()}" type="button" class="btn btn-danger" onclick="return confirm('Do you really want to delete this event?')" title="Delete Event"><i class="fa-solid fa-trash"></i></a>
-                            <#else>
-                                <a href="/events/delete/${event.getEventId()}" type="button" class="btn btn-danger" onclick="return confirm('Do you really want to delete this event?')" title="Delete Event"><i class="fa-solid fa-trash"></i></a>
+                            <#if loggedInUser?? && loggedInUser.role == "admin">
+                                <#if event.status == "Draft">
+                                    <a href="/events/publish/${event.eventId}" type="button" class="btn btn-warning" onclick="return confirm('Are you ready to make ${event.eventName} open for tickets?')" title="Publish Event"><i class="fa-solid fa-paper-plane"></i></a>
+                                    <a href="/events/delete/${event.getEventId()}" type="button" class="btn btn-danger" onclick="return confirm('Do you really want to delete this event?')" title="Delete Event"><i class="fa-solid fa-trash"></i></a>
+                                <#else>
+                                    <a href="/events/delete/${event.getEventId()}" type="button" class="btn btn-danger" onclick="return confirm('Do you really want to delete this event?')" title="Delete Event"><i class="fa-solid fa-trash"></i></a>
+                                </#if>
                             </#if>
                         <#else>
-                            <a href="/events/publish/${event.eventId}" type="button" class="btn btn-warning" title="Unpublish Event" onclick="return confirm('Are you sure you want to close ${event.eventName}?')"><i class="fa-solid fa-ban"></i></a>
-                            <a href="/payment/all/${event.eventId}" type="button" class="btn btn-info" title="Send Payment Reminder" onclick="return confirm('Are you sure you want to send reminder for payment for ${event.eventName}?')"><i class="fa-solid fa-envelope"></i></a>
-                            <a href="/payment_list/${event.eventId}" type="button" class="btn btn-danger" title="Check Payment" ><i class="fa-solid fa-dollar"></i> <i class="fa-solid fa-check"></i></a>
-                            <a href="/event/stats/${event.eventId}" type="button" class="btn btn-success" title="Event Stats"><i class="fa-solid fa-chart-simple"></i></a>
-                            <a href="/participant_list?eventId=${event.eventId}" type="button" class="btn btn-secondary" title="Participants List"><i class="fa-solid fa-hand"></i></a>
+                            <#if loggedInUser?? && loggedInUser.role == "admin">
+                                <#if event.status == "active" || event.status == "Active">
+                                    <a href="/participant_list?eventId=${event.eventId}" type="button" class="btn btn-secondary" title="Participants List"><i class="fa-solid fa-hand"></i></a>                                    <!-- Unpublish and Payment Reminder buttons moved to edit page -->
+                                    <a href="/payment_list/${event.eventId}" type="button" class="btn btn-danger" title="Check Payment" ><i class="fa-solid fa-dollar"></i> <i class="fa-solid fa-check"></i></a>
+                                    <a href="/checkin?eventId=${event.eventId}" type="button" class="btn btn-warning" title="Checkin"><i class="fa-solid fa-check"></i></a>
+                                    <a href="/event/stats/${event.eventId}" type="button" class="btn btn-success" title="Event Stats"><i class="fa-solid fa-chart-simple"></i></a>
+                                <#else>
+                                    <!-- Only show stats for non-active events -->
+                                    <a href="/event/stats/${event.eventId}" type="button" class="btn btn-success" title="Event Stats"><i class="fa-solid fa-chart-simple"></i></a>
+                                </#if>
+                            <#else>
+                                <#if event.status == "active" || event.status == "Active">
+                                    <a href="/checkin?eventId=${event.eventId}" type="button" class="btn btn-secondary" title="Checkin"><i class="fa-solid fa-check"></i></a>
+                                    <a href="/participant_list?eventId=${event.eventId}" type="button" class="btn btn-secondary" title="Participants List"><i class="fa-solid fa-hand"></i></a>
+                                </#if>
+                            </#if>
                         </#if>
                     </td>
                 </tr>

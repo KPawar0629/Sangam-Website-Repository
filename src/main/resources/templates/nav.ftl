@@ -68,7 +68,10 @@
                         <a class="nav-link" aria-current="page" href="/dashboard">Home</a>
                     </li>
                     <#if loggedInUser??>
-                        <li class="nav-item dropdown">
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/event_list">Events</a>
+                        </li>
+                        <#--  <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Events
                             </a>
@@ -80,7 +83,7 @@
                                 <li><a class="dropdown-item text-center" href="/participant_list">Participants</a></li>
                                 <li><a class="dropdown-item text-center" href="/checkin">Check In Tickets</a></li>
                             </ul>
-                        </li>
+                        </li>  -->
                     </#if>
                     <li class="nav-item">
                         <a class="nav-link" href="/about_us">About Us</a>
@@ -92,6 +95,9 @@
                             ${(loggedInUser.email)!}
                         </a>
                         <ul class="dropdown-menu p-2">
+                            <#if loggedInUser.role == "admin" || loggedInUser.role == "staff">
+                            <li><a class="dropdown-item text-center" href="/itemstock">Item Stock</a></li>
+                            </#if>
                             <#if loggedInUser.role == "admin">
                             <li><a class="dropdown-item text-center" href="/user_list">All Users</a></li>
                             </#if>

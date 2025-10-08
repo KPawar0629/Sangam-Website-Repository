@@ -19,11 +19,23 @@
         <form action="/events" method="post">
             <div class="container mt-3">
                 <div class="row mt-4">
-                    <div class="col-sm-10 justify-content-start">
+                    <div class="col-md-6 justify-content-start">
                         <h2>${event.eventId?has_content?then('Edit Event', 'Create New Event')}</h2>
                     </div>
-                    <div class="col-sm-2 text-end">
-                        <button type="submit" class="btn btn-success">${event.eventId?has_content?then('Update', 'Save')}</button>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-end gap-2">
+                            <#if event.eventId?? && event.published == 1 && (event.status == "active" || event.status == "Active")>
+                                <a href="/events/publish/${event.eventId}" type="button" class="btn btn-warning" 
+                                   title="Unpublish Event" onclick="return confirm('Are you sure you want to close ${event.eventName}?')">
+                                    <i class="fa-solid fa-ban"></i> Unpublish
+                                </a>
+                                <a href="/payment/all/${event.eventId}" type="button" class="btn btn-info" 
+                                   title="Send Payment Reminder" onclick="return confirm('Are you sure you want to send reminder for payment for ${event.eventName}?')">
+                                    <i class="fa-solid fa-envelope"></i> Send Reminder
+                                </a>
+                            </#if>
+                            <button type="submit" class="btn btn-success">${event.eventId?has_content?then('Update', 'Save')}</button>
+                        </div>
                     </div>
                 </div>
 
@@ -74,24 +86,46 @@
                     <h3>Participation</h3>
                     <div class="mb-3">
                         <label class="form-label">Participation Allowed?</label>
-                        <#if event.participationAllowed == 1>
-                            <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" onclick="showHide(2)" value="no" id="noParti">
-                            <label class="btn" for="noParti">No</label>
-                            <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" checked onclick="showHide(1)" value="yes" id="yesParti">
-                            <label class="btn" for="yesParti">Yes</label>
-                        <#else>
-                            <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" checked onclick="showHide(2)" value="no" id="noParti">
-                            <label class="btn" for="noParti">No</label>
-                            <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" onclick="showHide(1)" value="yes" id="yesParti">
-                            <label class="btn" for="yesParti">Yes</label>
-                        </#if>
+                        <#if event.status == "active" || event.status == "Active">
+                            <#if event.participationAllowed == 1>
+                                <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" onclick="showHide(2)" value="no" id="noParti">
+                                <label class="btn" for="noParti">No</label>
+                                <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" checked onclick="showHide(1)" value="yes" id="yesParti">
+                                <label class="btn" for="yesParti">Yes</label>
+                            <#else>
+                                <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" checked onclick="showHide(2)" value="no" id="noParti">
+                                <label class="btn" for="noParti">No</label>
+                                <input type="radio" class="btn-check form-control" name="partiCheck" autocomplete="off" onclick="showHide(1)" value="yes" id="yesParti">
+                                <label class="btn" for="yesParti">Yes</label>
+                            </#if>
 
-                        <div id="yesDiv" class="d-none">
-                            <label for="partiStart" class="form-label">Start Date:</label>
-                            <input id="partiStart" type="date" name="partiStart" value="${(event.participationStartDate)!}" class="form-control">
-                            <label for="partiEnd" class="form-label">End Date:</label>
-                            <input id="partiEnd" type="date" name="partiEnd" value="${(event.participationEndDate)!}" class="form-control">
-                        </div>
+                            <div id="yesDiv" class="d-none">
+                                <label for="partiStart" class="form-label">Start Date:</label>
+                                <input id="partiStart" type="date" name="partiStart" value="${(event.participationStartDate)!}" class="form-control">
+                                <label for="partiEnd" class="form-label">End Date:</label>
+                                <input id="partiEnd" type="date" name="partiEnd" value="${(event.participationEndDate)!}" class="form-control">
+                            </div>
+                        <#else>
+                            <p class="text-muted">
+                                <#if event.participationAllowed == 1>
+                                    <span class="badge bg-success">Yes</span>
+                                    <#if event.participationStartDate?? && event.participationEndDate??>
+                                        (From: ${event.participationStartDate} To: ${event.participationEndDate})
+                                    </#if>
+                                <#else>
+                                    <span class="badge bg-secondary">No</span>
+                                </#if>
+                                <br>
+                                <small class="text-muted mt-2 d-block">Participation settings can only be modified when the event is active.</small>
+                            </p>
+                            <input type="hidden" name="partiCheck" value="<#if event.participationAllowed?? && event.participationAllowed == 1>yes<#else>no</#if>">
+                            <#if event.participationStartDate??>
+                                <input type="hidden" name="partiStart" value="${event.participationStartDate}">
+                            </#if>
+                            <#if event.participationEndDate??>
+                                <input type="hidden" name="partiEnd" value="${event.participationEndDate}">
+                            </#if>
+                        </#if>
                     </div>
                     <#if event.eventId?? && event.eventType?? && (event.eventType != "paid")>
                         <br>
@@ -99,28 +133,56 @@
                         <h3>RSVP</h3>
                         <div class="mb-3">
                             <label class="form-label">RSVP Allowed?</label>
-                            <#if event.rsvpYes?? && event.rsvpYes == "yes">
-                                <input type="radio" class="btn-check form-control" name="rsvpCheck" autocomplete="off" value="no" id="noRsvp" onclick="toggleRsvpCount(false)">
-                                <label class="btn" for="noRsvp">No</label>
-                                <input type="radio" class="btn-check form-control" checked name="rsvpCheck" autocomplete="off" value="yes" id="yesRsvp" onclick="toggleRsvpCount(true)">
-                                <label class="btn" for="yesRsvp">Yes</label>
-                            <#else>
-                                <input type="radio" class="btn-check form-control" checked name="rsvpCheck" autocomplete="off" value="no" id="noRsvp" onclick="toggleRsvpCount(false)">
-                                <label class="btn" for="noRsvp">No</label>
-                                <input type="radio" class="btn-check form-control" name="rsvpCheck" autocomplete="off" value="yes" id="yesRsvp" onclick="toggleRsvpCount(true)">
-                                <label class="btn" for="yesRsvp">Yes</label>
-                            </#if>
-                            <div id="rsvpCountDiv" class="mt-3 ${(event.rsvpYes?? && event.rsvpYes == 'yes')?then('', 'd-none')}">
-                                <label for="rsvpCount" class="form-label">Maximum RSVP Count:</label>
-                                <input type="number" class="form-control" id="rsvpCount" name="rsvpCount" value="${event.rsvpCount!0}" min="0">
-                                
-                                <div class="mt-3">
-                                    <label for="rsvpStart" class="form-label">RSVP Start Date:</label>
-                                    <input id="rsvpStart" type="date" name="rsvpStart" value="${(event.rsvpStartDate)!}" class="form-control">
-                                    <label for="rsvpEnd" class="form-label">RSVP End Date:</label>
-                                    <input id="rsvpEnd" type="date" name="rsvpEnd" value="${(event.rsvpEndDate)!}" class="form-control">
+                            <#if event.status == "active" || event.status == "Active">
+                                <#if event.rsvpYes?? && event.rsvpYes == "yes">
+                                    <input type="radio" class="btn-check form-control" name="rsvpCheck" autocomplete="off" value="no" id="noRsvp" onclick="toggleRsvpCount(false)">
+                                    <label class="btn" for="noRsvp">No</label>
+                                    <input type="radio" class="btn-check form-control" checked name="rsvpCheck" autocomplete="off" value="yes" id="yesRsvp" onclick="toggleRsvpCount(true)">
+                                    <label class="btn" for="yesRsvp">Yes</label>
+                                <#else>
+                                    <input type="radio" class="btn-check form-control" checked name="rsvpCheck" autocomplete="off" value="no" id="noRsvp" onclick="toggleRsvpCount(false)">
+                                    <label class="btn" for="noRsvp">No</label>
+                                    <input type="radio" class="btn-check form-control" name="rsvpCheck" autocomplete="off" value="yes" id="yesRsvp" onclick="toggleRsvpCount(true)">
+                                    <label class="btn" for="yesRsvp">Yes</label>
+                                </#if>
+                                <div id="rsvpCountDiv" class="mt-3 <#if event.rsvpYes?? && event.rsvpYes == 'yes'><#else>d-none</#if>">
+                                    <label for="rsvpCount" class="form-label">Maximum RSVP Count:</label>
+                                    <input type="number" class="form-control" id="rsvpCount" name="rsvpCount" value="${event.rsvpCount!0}" min="0">
+                                    
+                                    <div class="mt-3">
+                                        <label for="rsvpStart" class="form-label">RSVP Start Date:</label>
+                                        <input id="rsvpStart" type="date" name="rsvpStart" value="${(event.rsvpStartDate)!}" class="form-control">
+                                        <label for="rsvpEnd" class="form-label">RSVP End Date:</label>
+                                        <input id="rsvpEnd" type="date" name="rsvpEnd" value="${(event.rsvpEndDate)!}" class="form-control">
+                                    </div>
                                 </div>
-                            </div>
+                            <#else>
+                                <p class="text-muted">
+                                    <#if event.rsvpYes?? && event.rsvpYes == "yes">
+                                        <span class="badge bg-success">Yes</span>
+                                        <#if event.rsvpCount??>
+                                            (Max: ${event.rsvpCount})
+                                        </#if>
+                                        <#if event.rsvpStartDate?? && event.rsvpEndDate??>
+                                            <br>From: ${event.rsvpStartDate} To: ${event.rsvpEndDate}
+                                        </#if>
+                                    <#else>
+                                        <span class="badge bg-secondary">No</span>
+                                    </#if>
+                                    <br>
+                                    <small class="text-muted mt-2 d-block">RSVP settings can only be modified when the event is active.</small>
+                                </p>
+                                <input type="hidden" name="rsvpCheck" value="<#if event.rsvpYes?? && event.rsvpYes == 'yes'>yes<#else>no</#if>">
+                                <#if event.rsvpCount??>
+                                    <input type="hidden" name="rsvpCount" value="${event.rsvpCount}">
+                                </#if>
+                                <#if event.rsvpStartDate??>
+                                    <input type="hidden" name="rsvpStart" value="${event.rsvpStartDate}">
+                                </#if>
+                                <#if event.rsvpEndDate??>
+                                    <input type="hidden" name="rsvpEnd" value="${event.rsvpEndDate}">
+                                </#if>
+                            </#if>
                         </div>
                     </#if>
                 </#if>
@@ -137,7 +199,11 @@
                     <div class="row border-bottom-0">
                         <div class="col-sm-10"><h3>Pricing Details</h3></div>
                         <div class="col-sm-2 text-end">
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPricing">+ Add Pricing</button>
+                            <#if event.status == "active" || event.status == "Active">
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPricing">+ Add Pricing</button>
+                            <#else>
+                                <span class="text-muted"><small>Pricing can only be modified when the event is active</small></span>
+                            </#if>
                         </div>
                     </div>
                     <table class="table mt-4 table-striped">
@@ -148,7 +214,9 @@
                             <th>Start Date</th>
                             <th>End Date</th>
                             <th>Rate Per Ticket</th>
-                            <th>Actions</th>
+                            <#if event.status == "active" || event.status == "Active">
+                                <th>Actions</th>
+                            </#if>
                         </tr>
                         </thead>
                         <tbody>
@@ -159,6 +227,7 @@
                                 <td>${pricing.startDate}</td>
                                 <td>${pricing.endDate}</td>
                                 <td>$${pricing.pricingRate}</td>
+                                <#if event.status == "active" || event.status == "Active">
                                 <td>
                                     <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addPricing"
                                     data-id="${pricing.id}"
@@ -169,6 +238,7 @@
                                     data-enddate="${pricing.endDate}" title="Edit Pricing"><i class="fa-solid fa-pen"></i></a>
                                     <a href="/event_pricing/delete/${pricing.id}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this pricing?')" title="Delete Pricing"><i class="fa-solid fa-trash"></i></a>
                                 </td>
+                                </#if>
                             </tr>
                         </#list>
                         </tbody>
@@ -264,32 +334,19 @@
         hiddenIdInput.value = id;
     });
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize RSVP controls if they exist
+        const yesRsvp = document.getElementById('yesRsvp');
+        if (yesRsvp && yesRsvp.checked) {
+            toggleRsvpCount(true);
+        }
+        
+        // Only initialize pricing form validation if the form exists
         const form = document.getElementById('pricingForm');
-        const warningText = document.getElementById('warningText');
-        const submitButton = form.querySelector('button[type="submit"]');
+        if (form) {
+            const warningText = document.getElementById('warningText');
+            const submitButton = form.querySelector('button[type="submit"]');
 
-        form.addEventListener('submit', function (event) {
-            const startDateInput = form.querySelector('input[name="startDate"]');
-            const endDateInput = form.querySelector('input[name="endDate"]');
-
-            if (startDateInput && endDateInput) {
-                const startDate = new Date(startDateInput.value);
-                const endDate = new Date(endDateInput.value);
-
-                if (endDate < startDate) {
-                    event.preventDefault(); // Prevent form submission
-                    warningText.textContent = 'End date must be greater than or equal to the start date.';
-                    submitButton.disabled = true; // Disable submit button
-                } else {
-                    warningText.textContent = ''; // Clear warning text
-                    submitButton.disabled = false; // Enable submit button
-                }
-            }
-        });
-
-        // Optional: Enable submit button when fields change
-        form.querySelectorAll('input[name="startDate"], input[name="endDate"]').forEach(input => {
-            input.addEventListener('change', function () {
+            form.addEventListener('submit', function (event) {
                 const startDateInput = form.querySelector('input[name="startDate"]');
                 const endDateInput = form.querySelector('input[name="endDate"]');
 
@@ -298,15 +355,37 @@
                     const endDate = new Date(endDateInput.value);
 
                     if (endDate < startDate) {
+                        event.preventDefault(); // Prevent form submission
                         warningText.textContent = 'End date must be greater than or equal to the start date.';
-                        submitButton.disabled = true;
+                        submitButton.disabled = true; // Disable submit button
                     } else {
-                        warningText.textContent = '';
-                        submitButton.disabled = false;
+                        warningText.textContent = ''; // Clear warning text
+                        submitButton.disabled = false; // Enable submit button
                     }
                 }
             });
-        });
+
+            // Optional: Enable submit button when fields change
+            form.querySelectorAll('input[name="startDate"], input[name="endDate"]').forEach(input => {
+                input.addEventListener('change', function () {
+                    const startDateInput = form.querySelector('input[name="startDate"]');
+                    const endDateInput = form.querySelector('input[name="endDate"]');
+
+                    if (startDateInput && endDateInput) {
+                        const startDate = new Date(startDateInput.value);
+                        const endDate = new Date(endDateInput.value);
+
+                        if (endDate < startDate) {
+                            warningText.textContent = 'End date must be greater than or equal to the start date.';
+                            submitButton.disabled = true;
+                        } else {
+                            warningText.textContent = '';
+                            submitButton.disabled = false;
+                        }
+                    }
+                });
+            });
+        }
     });
 
     function showHide(val) {
@@ -320,6 +399,25 @@
             yesDiv.classList.add('d-none');
             partiStart.required = false;
             partiEnd.required = false;
+        }
+    }
+    
+    function toggleRsvpCount(show) {
+        const rsvpCountDiv = document.getElementById('rsvpCountDiv');
+        const rsvpCount = document.getElementById('rsvpCount');
+        const rsvpStart = document.getElementById('rsvpStart');
+        const rsvpEnd = document.getElementById('rsvpEnd');
+        
+        if (show) {
+            rsvpCountDiv.classList.remove('d-none');
+            if (rsvpCount) rsvpCount.required = true;
+            if (rsvpStart) rsvpStart.required = true;
+            if (rsvpEnd) rsvpEnd.required = true;
+        } else {
+            rsvpCountDiv.classList.add('d-none');
+            if (rsvpCount) rsvpCount.required = false;
+            if (rsvpStart) rsvpStart.required = false;
+            if (rsvpEnd) rsvpEnd.required = false;
         }
     }
 </script>

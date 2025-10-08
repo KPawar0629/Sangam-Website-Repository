@@ -211,6 +211,62 @@ public class SignInController {
 //        }
     }
 
+    @GetMapping("/checkin")
+    public String showCheckIn(@RequestParam(value = "eventId", required = false) String eventId, HttpSession session, Model model, HttpServletRequest request) {
+        // Authentication using cookies (same pattern as other methods)
+        String authToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (var cookie : cookies) {
+                if (cookie.getName().equals("authToken")) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+        var user = new User();
+        if (authToken != null) {
+            if (userService.validateToken(authToken)) {
+                user = userService.getUserByToken(authToken).get();
+                model.addAttribute("loggedInUser", user);
+            } else {
+                return "redirect:/signin";
+            }
+        } else {
+            return "redirect:/signin";
+        }
+
+        // Load ticket details for check-in (filtered by event if specified)
+        List<TicketDetails> details;
+        if (eventId != null && !eventId.isEmpty()) {
+            details = ticketDetailsService.findByEventId(eventId);
+        } else {
+            details = ticketDetailsService.findAllTicketDetails();
+        }
+        model.addAttribute("details", details);
+        model.addAttribute("selectedEventId", eventId);
+
+        // Load all events for the dropdown filter
+        List<Event> events = eventService.findAllEvents();
+        Map<String, Event> eventsMap = new HashMap<>();
+        for (Event event : events) {
+            eventsMap.put(event.getEventId(), event);
+        }
+        model.addAttribute("events", events);
+        model.addAttribute("eventsMap", eventsMap);
+
+        // Load users map for displaying who checked in each ticket
+        Map<String, User> users = new HashMap<>();
+        for (TicketDetails detail : details) {
+            if (detail.getCheckedInBy() != null) {
+                Optional<User> checkedInByUser = userService.getUserByUserId(detail.getCheckedInBy());
+                checkedInByUser.ifPresent(u -> users.put(detail.getCheckedInBy(), u));
+            }
+        }
+        model.addAttribute("users", users);
+
+        return "checkin_list";
+    }
+
     @GetMapping("/about_us")
     public String showAboutUsPage(HttpSession session, Model model, HttpServletRequest request) {
         String authToken = null;
@@ -388,7 +444,7 @@ public class SignInController {
     // }
 
     @PostMapping("/confirmCheckIn")
-    public String confirmCheckIn(@RequestParam("ticketId") String ticketId, HttpServletRequest request) {
+    public String confirmCheckIn(@RequestParam("ticketIds") String[] ticketIds, HttpServletRequest request) {
         String authToken = null;
 
         Cookie[] cookies = request.getCookies();
@@ -411,22 +467,45 @@ public class SignInController {
             return "redirect:/signin";
         }
 
+        // Process each selected ticket for check-in
+        for (String ticketId : ticketIds) {
+            Optional<TicketDetails> details = ticketDetailsService.findTicketDetailsByDetailsId(ticketId);
 
-        Optional<TicketDetails> details = ticketDetailsService.findTicketDetailsByDetailsId(ticketId);
-
-        if (details.isPresent()) {
-            TicketDetails ticketDetails = details.get();
-            ticketDetails.setCheckedIn(1);
-            ticketDetails.setCheckedInBy(user.getUserId());
-            ticketDetails.setCheckedInAt(new Date().toString());
-            ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
+            if (details.isPresent()) {
+                TicketDetails ticketDetails = details.get();
+                ticketDetails.setCheckedIn(1);
+                ticketDetails.setCheckedInBy(user.getUserId());
+                ticketDetails.setCheckedInAt(new Date().toString());
+                ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
+            }
         }
 
-        return "redirect:/checkin_list";
+        return "redirect:/checkin";
     }
 
     @GetMapping("/event/stats/{eventId}")
     public String getEventStats(@PathVariable String eventId, Model model, HttpServletRequest request) {
+        String authToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (var cookie : cookies) {
+                if (cookie.getName().equals("authToken")) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+        var user = new User();
+        if (authToken != null) {
+            if (userService.validateToken(authToken)) {
+                user = userService.getUserByToken(authToken).get();
+                model.addAttribute("loggedInUser", user);
+            } else {
+                return "redirect:/signin";
+            }
+        } else {
+            return "redirect:/signin";
+        }
+
         Event event = eventService.findEventById(eventId);
         if (event == null) {
             return "redirect:/event_list";

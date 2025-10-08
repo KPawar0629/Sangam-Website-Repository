@@ -24,14 +24,24 @@
         <div id="main-content">
             <div class="container mt-3">
                 <div class="row mb-3">
-                    <h3 class="col-12 col-md-7">Check In Tickets</h3>
-                    <div class="col-12 col-md-2">
+                    <h3 class="col-12 col-lg-6">Check In Tickets</h3>
+                    <div class="col-12 col-sm-6 col-lg-2">
                         <button id="toggleButton" class="btn btn-success">Show All</button>
                     </div>
-                    <div class="col-12 col-md-3">
+                    <div class="col-12 col-sm-6 col-lg-2">
+                        <select class="form-select" id="eventFilter" onchange="filterByEvent()">
+                            <option value="">All Events</option>
+                            <#list events as event>
+                                <option value="${event.eventId}" <#if selectedEventId?? && selectedEventId == event.eventId>selected</#if>>
+                                    ${event.eventName}
+                                </option>
+                            </#list>
+                        </select>
+                    </div>
+                    <div class="col-12 col-lg-2">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1">&#128270</span>
-                            <input class="form-control" type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Enter search text here...">
+                            <input class="form-control" type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Search names...">
                         </div>
                     </div>
                 </div>
@@ -49,18 +59,47 @@
                                     <th>Name</th>
                                     <th>Ticket Code</th>
                                     <th>Ticket Type</th>
+                                    <th class="hide-on-md">Event</th>
                                     <th class="hide-on-md">CheckIn By</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 <#list details as detail>
-                                        <#if detail.paidStatus == 0>
+                                    <#if detail.paidStatus == 0>
                                         <tr class="toggle-row d-none">
                                             <td><button type="button" class="btn btn-danger" disabled>&dollar;</button></td>
-                                        <#elseif detail.checkedIn == 1>
+                                            <td>${detail.fullName}</td>
+                                            <td>${detail.getUniqueCode()}</td>
+                                            <td>${detail.pricingOptionName}</td>
+                                            <td class="hide-on-md">
+                                                <#if detail.eventId?? && eventsMap[detail.eventId]??>
+                                                    ${eventsMap[detail.eventId].eventName}
+                                                <#else>
+                                                    N/A
+                                                </#if>
+                                            </td>
+                                            <td class="hide-on-md"></td>
+                                        </tr>
+                                    <#elseif detail.checkedIn == 1>
                                         <tr class="toggle-row d-none">
-                                            <td><button type="button" class="btn btn-success" disabled>&check;</button> </td>
-                                        <#else>
+                                            <td><button type="button" class="btn btn-success" disabled>&check;</button></td>
+                                            <td>${detail.fullName}</td>
+                                            <td>${detail.getUniqueCode()}</td>
+                                            <td>${detail.pricingOptionName}</td>
+                                            <td class="hide-on-md">
+                                                <#if detail.eventId?? && eventsMap[detail.eventId]??>
+                                                    ${eventsMap[detail.eventId].eventName}
+                                                <#else>
+                                                    N/A
+                                                </#if>
+                                            </td>
+                                            <#if detail.checkedInBy?? && users[detail.checkedInBy]??>
+                                            <td class="hide-on-md">${users[detail.checkedInBy].fullName}</td>
+                                            <#else>
+                                            <td class="hide-on-md"></td>
+                                            </#if>
+                                        </tr>
+                                    <#else>
                                         <tr>
                                             <td>
                                                 <div>
@@ -71,13 +110,21 @@
                                             <td>${detail.fullName}</td>
                                             <td>${detail.getUniqueCode()}</td>
                                             <td>${detail.pricingOptionName}</td>
+                                            <td class="hide-on-md">
+                                                <#if detail.eventId?? && eventsMap[detail.eventId]??>
+                                                    ${eventsMap[detail.eventId].eventName}
+                                                <#else>
+                                                    N/A
+                                                </#if>
+                                            </td>
                                             <#if detail.checkedInBy?? && users[detail.checkedInBy]??>
                                             <td class="hide-on-md">${users[detail.checkedInBy].fullName}</td>
                                             <#else>
                                             <td class="hide-on-md"></td>
                                             </#if>
                                         </tr>
-                                    </#list>
+                                    </#if>
+                                </#list>
                                     </tbody>
                                 </table>
 
@@ -124,10 +171,21 @@
 
         // Loop through all table rows, and hide those who don't match the search query
         for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[1];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            // Search in name (column 1), ticket code (column 2), ticket type (column 3), and event (column 4)
+            var nameCol = tr[i].getElementsByTagName("td")[1];
+            var codeCol = tr[i].getElementsByTagName("td")[2];
+            var typeCol = tr[i].getElementsByTagName("td")[3];
+            var eventCol = tr[i].getElementsByTagName("td")[4];
+            
+            if (nameCol || codeCol || typeCol || eventCol) {
+                var nameValue = nameCol ? (nameCol.textContent || nameCol.innerText) : "";
+                var codeValue = codeCol ? (codeCol.textContent || codeCol.innerText) : "";
+                var typeValue = typeCol ? (typeCol.textContent || typeCol.innerText) : "";
+                var eventValue = eventCol ? (eventCol.textContent || eventCol.innerText) : "";
+                
+                var allText = (nameValue + " " + codeValue + " " + typeValue + " " + eventValue).toUpperCase();
+                
+                if (allText.indexOf(filter) > -1) {
                     tr[i].style.display = "";
                 } else {
                     tr[i].style.display = "none";
@@ -170,6 +228,19 @@
     window.addEventListener('DOMContentLoaded', () => {
         myModal.show();
     });
+
+    function filterByEvent() {
+        const selectedEventId = document.getElementById('eventFilter').value;
+        const currentUrl = new URL(window.location);
+        
+        if (selectedEventId) {
+            currentUrl.searchParams.set('eventId', selectedEventId);
+        } else {
+            currentUrl.searchParams.delete('eventId');
+        }
+        
+        window.location.href = currentUrl.toString();
+    }
 
     
 </script>

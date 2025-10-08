@@ -53,6 +53,16 @@
         <p style="margin: 0;">Attendees are responsible for their own safety and belongings. Children must be supervised by a parent or guardian at all times.</p>
       </div>
 
+      <!-- Nonprofit Information -->
+      <div style="text-align: center; margin-top: 25px; margin-bottom: 25px;">
+        <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 6px; display: inline-block; max-width: 500px;">
+          <div style="font-weight: bold; margin-bottom: 8px;">SANGAM Santa Barbara Inc. is a 501(c)(3) Non-Profit Public Charity.</div>
+          <div style="font-size: 13px; color: #6c757d; margin-bottom: 5px;">Federal Tax ID: 39-3121864</div>
+          <div style="font-size: 13px; color: #6c757d;">Your contributions support our community programs.</div>
+        </div>
+      </div>
+
+
       <p style="margin-top: 30px; font-size: 16px; color: #555555;"><strong>Team Sangam</strong></p> 
     </div>
 

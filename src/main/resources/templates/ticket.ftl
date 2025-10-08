@@ -174,8 +174,9 @@
         <div class="text-center mt-4 mb-4">
             <div class="alert alert-info d-inline-block" role="alert">
                 <i class="fa-solid fa-heart text-primary"></i>
-                <strong>SANGAM Santa Barbara Inc.</strong> is a <strong>501(c)(3) nonprofit public charity!</strong><br>
-                <small class="text-muted">Federal Tax ID: 39-3121864 | Your contributions support our community programs</small>
+                <strong>SANGAM Santa Barbara Inc.</strong> is a <strong>501(c)(3) Non-Profit Public Charity.</strong><br>
+                <small class="text-muted">Federal Tax ID: 39-3121864</small><br>
+                <small class="text-muted"> Your contributions support our community programs.</small>
             </div>
         </div>
 
