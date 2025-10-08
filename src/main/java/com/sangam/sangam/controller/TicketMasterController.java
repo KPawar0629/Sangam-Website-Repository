@@ -28,6 +28,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * Controller responsible for handling ticket purchase, management, and payment operations
+ */
 @Controller
 public class TicketMasterController {
 
@@ -44,6 +47,14 @@ public class TicketMasterController {
     @Autowired
     private UserService userService;
 
+    /**
+     * Displays the ticket purchase form for a specific event
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @param session HTTP session for user information
+     * @param eventId ID of the event to purchase tickets for
+     * @return the ticket form view
+     */
     @GetMapping("/tickets/new/{eventId}")
     public String showTicketForm(Model model, HttpSession session, @PathVariable String eventId) {
         Event event = eventService.findEventById(eventId);
@@ -58,6 +69,20 @@ public class TicketMasterController {
         return "/ticket";
     }
 
+    /**
+     * Handles the ticket purchase form submission for both paid tickets and RSVPs
+     * 
+     * @param eventInput Event ID
+     * @param fullName Full name of the ticket purchaser
+     * @param email Email of the ticket purchaser
+     * @param phone Phone number of the ticket purchaser
+     * @param params All form parameters including pricing options
+     * @param checkHidden Hidden field to prevent duplicate submissions
+     * @param response HTTP response for cookie management
+     * @param model Spring MVC Model for view attributes
+     * @param redirectAttributes Redirect attributes for flash messages
+     * @return redirect to dashboard after processing
+     */
     @PostMapping("/add_ticket")
     public String handleTicketSubmission(
             @RequestParam String eventInput,
@@ -226,11 +251,24 @@ public class TicketMasterController {
     }
 
 
+    /**
+     * Shows the ticket confirmation page after successful purchase
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @return the ticket confirmation view
+     */
     @GetMapping("/tickets/confirmation")
     public String showConfirmation(Model model) {
         return "ticket_confirmation";
     }
 
+    /**
+     * Shows details for a specific ticket by ID
+     * 
+     * @param ticketId ID of the ticket to display
+     * @param model Spring MVC Model for view attributes
+     * @return the ticket detail view or error page if not found
+     */
     @GetMapping("/tickets/{ticketId}")
     public String getTicketById(@PathVariable String ticketId, Model model) {
         Optional<TicketMaster> ticketMaster = Optional.ofNullable(ticketMasterService.findTicketMasterById(ticketId));
@@ -243,6 +281,12 @@ public class TicketMasterController {
         }
     }
 
+    /**
+     * Lists all tickets in the system
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @return the ticket list view
+     */
     @GetMapping("/tickets")
     public String getAllTickets(Model model) {
         List<TicketMaster> tickets = ticketMasterService.findAllTicketMasters();
@@ -250,10 +294,22 @@ public class TicketMasterController {
         return "ticket_list";
     }
 
+    /**
+     * Processes payment for a ticket master record and updates all associated ticket details
+     * Sends email confirmation to the ticket purchaser after payment is processed
+     * 
+     * @param masterId ID of the ticket master record
+     * @param session HTTP session for user information
+     * @param redirectAttributes Redirect attributes for flash messages
+     * @param request HTTP request to retrieve cookies for authentication
+     * @param model Spring MVC Model for view attributes
+     * @return redirect to payment list, filtered by event if available
+     */
     @GetMapping("/payment/{masterId}")
     public String receivePayment(@PathVariable String masterId, HttpSession session, RedirectAttributes redirectAttributes, HttpServletRequest request, Model model) {
         String authToken = null;
 
+        // Authenticate user from cookies
         Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             for(var cookie : cookies) {
@@ -314,6 +370,14 @@ public class TicketMasterController {
         return "redirect:/payment_list";
     }
 
+    /**
+     * Reverses a payment for a ticket master record
+     * Updates both the ticket master and all associated ticket details to unpaid status
+     * 
+     * @param masterId ID of the ticket master record
+     * @param redirectAttributes Redirect attributes for flash messages
+     * @return redirect to payment list, filtered by event if available
+     */
     @GetMapping("/tickets/undo/{masterId}")
     public String undoPayment(@PathVariable String masterId, RedirectAttributes redirectAttributes) {
         TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
@@ -321,11 +385,13 @@ public class TicketMasterController {
 
         if (master != null) {
             eventId = master.getEventId();
+            // Update all ticket details to unpaid
             List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(master.getTicketMasterId());
             for(TicketDetails detail : details) {
                 detail.setPaidStatus(0);
                 ticketDetailsService.addOrUpdateTicketDetails(detail);
             }
+            // Reset payment information on master record
             master.setPaymentReceived(0);
             master.setPaymentReceivedBy(null);
             master.setPaymentReceivedAt(null);
@@ -340,6 +406,13 @@ public class TicketMasterController {
         return "redirect:/payment_list";
     }
 
+    /**
+     * Deletes a ticket master record and all its associated ticket details
+     * 
+     * @param masterId ID of the ticket master record to delete
+     * @param redirectAttributes Redirect attributes for flash messages
+     * @return redirect to payment list, filtered by event if available
+     */
     @GetMapping("/tickets/delete/{masterId}")
     public String deleteTicket(@PathVariable String masterId, RedirectAttributes redirectAttributes) {
         TicketMaster master = ticketMasterService.findTicketMasterById(masterId);
@@ -347,10 +420,12 @@ public class TicketMasterController {
 
         if (master != null) {
             eventId = master.getEventId();
+            // Delete all associated ticket details first
             List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(master.getTicketMasterId());
             for(TicketDetails detail : details) {
                 ticketDetailsService.deleteTicketDetails(detail.getDetailId());
             }
+            // Then delete the master record
             ticketMasterService.deleteTicketMaster(masterId);
             redirectAttributes.addFlashAttribute("message", "Ticket for " + master.getFullName() + " deleted.");
         }
@@ -362,6 +437,15 @@ public class TicketMasterController {
         return "redirect:/payment_list";
     }
 
+    /**
+     * Sends payment reminder emails to all unpaid ticket holders for an event
+     * 
+     * @param eventId ID of the event to send reminders for
+     * @param redirectAttributes Redirect attributes for flash messages
+     * @param request HTTP request to retrieve cookies for authentication
+     * @param model Spring MVC Model for view attributes
+     * @return redirect to event list with status message
+     */
     @GetMapping("/payment/all/{eventId}")
     public String sendPaymentReminder(@PathVariable String eventId, RedirectAttributes redirectAttributes, HttpServletRequest request, Model model) {
         // Authentication check
@@ -423,6 +507,11 @@ public class TicketMasterController {
         return "redirect:/event_list";
     }
 
+    /**
+     * Generates a random 6-digit code for ticket unique identifiers
+     * 
+     * @return a random integer between 0 and 999999
+     */
     public static int getRandomCode() {
         Random rnd = new Random();
         int number = rnd.nextInt(999999);

@@ -14,17 +14,31 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controller responsible for user management operations including listing,
+ * modifying, retrieving, and deleting users.
+ */
 @Controller
 public class UserController {
     @Autowired
     private UserService service;
 
+    /**
+     * Displays a list of all users in the system
+     * Requires user authentication
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @param request HTTP request to retrieve cookies for authentication
+     * @return the user list view or redirect to signin if not authenticated
+     */
     @GetMapping("/user_list")
     public String getAllUsers(Model model, HttpServletRequest request) {
+        // Get all users and add to model
         List<User> users = service.findAllUsers();
         model.addAttribute("users", users);
+        
+        // Authentication check
         String authToken = null;
-
         Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             for(var cookie : cookies) {
@@ -33,6 +47,7 @@ public class UserController {
                 }
             }
         }
+        
         var user = new User();
         if(authToken != null) {
             if(service.validateToken(authToken)) {
@@ -48,6 +63,13 @@ public class UserController {
         return "/user_list";
     }
 
+    /**
+     * Retrieves a user by ID
+     * Note: This returns a raw User object, not a view - used for API/AJAX calls
+     * 
+     * @param userId ID of the user to retrieve
+     * @return User object if found, or a new empty User object if not found
+     */
     @GetMapping("/{userId}")
     public User getUser(@PathVariable String userId) {
         Optional<User> optionalUser = service.findUserById(userId);
@@ -59,11 +81,28 @@ public class UserController {
         }
     }
 
+    /**
+     * Finds users by full name
+     * Note: This returns raw User objects, not a view - used for API/AJAX calls
+     * 
+     * @param userName Full name to search for
+     * @return List of matching User objects
+     */
     @GetMapping("/userName/{userName}")
     public List<User> findUserWithFullName(@PathVariable String userName) {
         return service.findUserByFullName(userName);
     }
 
+    /**
+     * Modifies an existing user's information
+     * 
+     * @param userId ID of the user to update
+     * @param fullName Updated full name
+     * @param email Updated email address
+     * @param password Updated password (note: stored in plaintext, security issue)
+     * @param phone Updated phone number
+     * @return redirect to the user list view
+     */
     @PostMapping("/user/modify")
     public String modifyUser(
         @RequestParam String userId,
@@ -85,6 +124,12 @@ public class UserController {
         return "/user_list";
     }
 
+    /**
+     * Deletes a user by ID
+     * 
+     * @param userId ID of the user to delete
+     * @return Result message from the service
+     */
     @DeleteMapping("/{userId}")
     public String deleteUser(@PathVariable String userId) {
         return service.deleteUser(userId);

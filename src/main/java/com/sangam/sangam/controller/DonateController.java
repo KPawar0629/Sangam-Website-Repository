@@ -3,7 +3,6 @@ package com.sangam.sangam.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.sangam.sangam.model.User;
 import com.sangam.sangam.service.UserService;
@@ -14,12 +13,23 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.ui.Model;
 
+/**
+ * Controller responsible for handling donation-related routes
+ */
 @Controller
 public class DonateController {
 
     @Autowired
     private UserService userService;
 
+    /**
+     * Displays the donation page with a "coming soon" message
+     *
+     * @param model    Spring MVC Model for view attributes
+     * @param response HTTP response for cookie management
+     * @param request  HTTP request to retrieve cookies for authentication
+     * @return the donate template view name or redirect to signin if not authenticated
+     */
     @GetMapping("/donate")
     public String donatePage(Model model, HttpServletResponse response, HttpServletRequest request) {
         String authToken = null;
@@ -43,7 +53,6 @@ public class DonateController {
         } else {
             return "redirect:/signin";
         }
-        // Add any necessary model attributes here
         return "donate";
     }
 }

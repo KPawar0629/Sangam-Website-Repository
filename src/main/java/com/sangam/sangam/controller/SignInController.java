@@ -38,6 +38,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Controller responsible for user authentication, dashboard, and various operational views
+ * including check-in, payments, event statistics, and participant management.
+ * 
+ * Note: This controller handles more functionality than its name suggests and should be
+ * refactored to separate concerns into DashboardController, CheckInController, etc.
+ */
 @Controller
 public class SignInController {
 
@@ -60,16 +67,38 @@ public class SignInController {
     @Autowired
     private DressCompetitionService dressCompetitionService;
 
+    /**
+     * Root URL handler - redirects to the dashboard
+     * 
+     * @return redirect view to dashboard
+     */
     @GetMapping("/")
     public RedirectView redirectToTarget() {
         return new RedirectView("/dashboard");
     }
 
+    /**
+     * Displays the sign-in page
+     * 
+     * @return the signin view
+     */
     @GetMapping("/signin")
     public String showSignInPage() {
         return "signin";
     }
 
+    /**
+     * Handles user sign-in form submission
+     * Validates credentials and sets auth token via cookies
+     * 
+     * @param email User's email address
+     * @param password User's password (note: stored in plaintext, security issue)
+     * @param session HTTP session for storing user data
+     * @param redirectAttributes Redirect attributes for messages
+     * @param model Spring MVC Model for view attributes
+     * @param response HTTP response for setting cookies
+     * @return redirect to dashboard on success or signin view with error on failure
+     */
     @PostMapping("/signin")
     public String handleSignIn(
             @RequestParam String email,
@@ -81,20 +110,21 @@ public class SignInController {
     ) {
         Optional<User> user = userService.findUserByEmail(email);
 
-
-
         if(user.isPresent() && user.get().getPassword().equals(password)) {
+            // Generate and set authentication token
             String authToken = UUID.randomUUID().toString();
             Cookie authCookie = new Cookie("authToken", authToken);
             userService.setToken(user.get(), authToken);
             authCookie.setHttpOnly(true);
-            authCookie.setSecure(false);
+            authCookie.setSecure(false); // Note: Should be true in production with HTTPS
             response.addCookie(authCookie);
+            
+            // Set success message cookie
             try {
                 String encodedMessage = URLEncoder.encode("Login Successful!", "UTF-8");
                 Cookie msgCookie = new Cookie("message", encodedMessage);
                 msgCookie.setHttpOnly(true);
-                msgCookie.setSecure(false);
+                msgCookie.setSecure(false); // Note: Should be true in production with HTTPS
                 response.addCookie(msgCookie);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -107,24 +137,38 @@ public class SignInController {
         }
     }
 
+    /**
+     * Displays the main dashboard with published events
+     * Handles authentication via cookies
+     * Updates event participation status
+     * Processes flash messages
+     * 
+     * @param session HTTP session
+     * @param model Spring MVC Model for view attributes
+     * @param request HTTP request to retrieve cookies
+     * @param response HTTP response for clearing message cookies
+     * @return the dashboard view
+     */
     @GetMapping("/dashboard")
     public String showDashboard(HttpSession session, Model model, HttpServletRequest request, HttpServletResponse response) {
+        // Load all event pricing options
         List<EventPricing> pricings = eventPricingService.findAllEventPricing();
         model.addAttribute("pricings", pricings);
 
+        // Load and filter events - only show published ones
         List<Event> events = eventService.findAllEvents();
         for (int i = 0; i < events.size(); i++) {
             if (events.get(i).getPublished() == 0) {
                 events.remove(i);
                 i = i - 1;
             } else {
-                if(events.get(i).getParticipationAllowed() == 1)
-                {
+                if(events.get(i).getParticipationAllowed() == 1) {
                     eventService.updatePartiStatusChecker(events.get(i));
-
                 }
             }
         }
+        
+        // Update pricing status for each event
         for (Event event: events) {
             List<EventPricing> eventPricings = eventPricingService.findEventPricingsByEventId(event.getEventId());
             for (EventPricing pricing : eventPricings) {
@@ -132,6 +176,7 @@ public class SignInController {
             }
         }
 
+        // Extract authentication and message from cookies
         String authToken = null;
         String message = null;
 
@@ -146,6 +191,7 @@ public class SignInController {
                     try {
                         String decodedMessage = URLDecoder.decode(cookie.getValue(), "UTF-8");
                         message = decodedMessage;
+                        // Clear the message cookie after reading
                         Cookie msgCookie = new Cookie("message", null);
                         msgCookie.setMaxAge(0);
                         response.addCookie(msgCookie);
@@ -156,25 +202,22 @@ public class SignInController {
             }
         }
 
+        // Add user to model if authenticated
         if(authToken != null) {
             if(userService.validateToken(authToken)) {
                 var user = userService.getUserByToken(authToken).get();
                 model.addAttribute("loggedInUser", user);
             }
         }
+        
+        // Add flash message if present
         if(message != null) {
             model.addAttribute("message", message);
         }
 
         model.addAttribute("events", events);
-        model.addAttribute("showing", compStatus());
+        model.addAttribute("showing", compStatus()); // Competition status flag
         return "dashboard";
-
-//        if(loggedInUser != null) {
-//            model.addAttribute("userEmail", loggedInUser.getEmail());
-//            model.addAttribute("userName", loggedInUser.getFullName());
-//            return "dashboard";
-//        }
     }
 
     public boolean compStatus() {
@@ -552,12 +595,11 @@ public class SignInController {
         Map<String, Double> paymentsReceivedCounts = new HashMap<>();
         Map<String, Double> pricingMoney = new HashMap<>();
         Map<String, Integer> checkInCount = new HashMap<>();
-        boolean noPaymentReceived = true;
+        
         for (TicketDetails detail : details) {
             amount += detail.getAmount();
             if (detail.getPaidStatus() == 1) {
                 paid += detail.getAmount();
-                noPaymentReceived = false;
             }
             if (detail.getCheckedIn() == 1) {
                 checkedIn++;

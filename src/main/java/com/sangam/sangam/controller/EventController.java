@@ -41,6 +41,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
 
 
+/**
+ * Controller responsible for event management operations including creation, editing,
+ * publishing, and deletion of events. Also handles event-related features like
+ * competition registration, pricing management, and event listings.
+ */
 @Controller
 public class EventController {
 
@@ -62,10 +67,19 @@ public class EventController {
     @Autowired
     private DressCompetitionService competitionService;
 
+    /**
+     * Displays the event creation form
+     * Requires user authentication
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @param request HTTP request to retrieve cookies for authentication
+     * @return the event form view or redirect to signin if not authenticated
+     */
     @GetMapping("/events/new")
     public String showCreateEventForm(Model model, HttpServletRequest request) {
         String authToken = null;
 
+        // Check authentication via cookies
         Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             for(var cookie : cookies) {
@@ -89,10 +103,22 @@ public class EventController {
         }
     }
 
+    /**
+     * Displays the event editing form with existing event data
+     * Also loads associated pricing options if available
+     * Requires user authentication
+     * 
+     * @param eventId ID of the event to edit
+     * @param pricingId Optional ID of a pricing option to edit
+     * @param model Spring MVC Model for view attributes
+     * @param request HTTP request to retrieve cookies for authentication
+     * @return the event form view or redirect to signin if not authenticated
+     */
     @GetMapping("/events/edit/{eventId}")
-    public String showEditEventForm(@PathVariable String eventId, @RequestParam(required = false) String pricingId,Model model, HttpServletRequest request) {
+    public String showEditEventForm(@PathVariable String eventId, @RequestParam(required = false) String pricingId, Model model, HttpServletRequest request) {
         String authToken = null;
 
+        // Check authentication via cookies
         Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             for(var cookie : cookies) {
@@ -112,6 +138,8 @@ public class EventController {
         } else {
             return "redirect:/signin";
         }
+        
+        // Load event and set defaults if needed
         Event event = service.findEventById(eventId);
         if(event.getEventType() == null) {
             event.setEventType("paid");
@@ -121,17 +149,18 @@ public class EventController {
             service.createOrUpdateEvent(event, user);
         }
         model.addAttribute("event", event);
+        
+        // Load associated pricing options
         List<EventPricing> eventPricings = pricingService.findEventPricingsByEventId(event.getEventId());
         model.addAttribute("eventPricings", eventPricings);
 
+        // If specific pricing option requested, add it to model
         if(pricingId != null && !pricingId.isEmpty()) {
             EventPricing pricing = pricingService.findEventPricingById(pricingId);
             model.addAttribute("pricing", pricing);
         }
 
         return "/event_form";
-
-
     }
 
     @PostMapping("/events")
@@ -282,6 +311,13 @@ public class EventController {
         return "redirect:/event_list";
     }
 
+    /**
+     * Formats a date string for display on the landing page
+     * Converts from ISO format to a more user-friendly format
+     * 
+     * @param date Date string in ISO_LOCAL_DATE_TIME format
+     * @return Formatted date string in "MMM d, yyyy h:mm a" format (e.g., "Oct 15, 2023 7:30 PM")
+     */
     public String landingPageFormatter(String date) {
         DateTimeFormatter inputFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
@@ -293,6 +329,20 @@ public class EventController {
         return outputDateTime;
     }
 
+    /**
+     * Determines and updates the status of an event based on current date and published state
+     * 
+     * Possible statuses:
+     * - "Completed!" - Event date has passed and was published
+     * - "Passed without publish!" - Event date has passed but was never published
+     * - "Active" - Event is upcoming and published
+     * - "Draft" - Event is upcoming but not published yet
+     * - "Happening Now!" - Event is currently happening and published
+     * - "Dropped!" - Event is currently happening but not published
+     * 
+     * @param event The event to check and update status for
+     * @return The calculated status string
+     */
     public String resetStatus(Event event) {
         DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy");
 
@@ -304,7 +354,7 @@ public class EventController {
         ZonedDateTime date1 = ZonedDateTime.parse(date1Str, outputFormatter.withZone(ZoneId.of("America/Los_Angeles")));
         ZonedDateTime date2 = ZonedDateTime.parse(date2Str, outputFormatter.withZone(ZoneId.of("America/Los_Angeles")));
 
-
+        // Event has already happened
         if (date1.isAfter(date2)) {
             if (event.getPublished() == 1) {
                 event.setStatus("Completed!");
@@ -313,7 +363,9 @@ public class EventController {
                 event.setStatus("Passed without publish!");
                 return "Passed without publish!";
             }
-        } else if (date1.isBefore(date2)) {
+        } 
+        // Event is in the future
+        else if (date1.isBefore(date2)) {
             if (event.getPublished() == 1) {
                 event.setStatus("Active");
                 return "Active";
@@ -321,7 +373,9 @@ public class EventController {
                 event.setStatus("Draft");
                 return "Draft";
             }
-        } else {
+        } 
+        // Event is happening right now
+        else {
             if (event.getPublished() == 1) {
                 event.setStatus("Happening Now!");
                 return "Happening Now!";
@@ -334,6 +388,17 @@ public class EventController {
 
 
 
+    /**
+     * Displays the list of all events
+     * Requires user authentication
+     * Updates the status of all events before display
+     * Processes flash messages from cookies
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @param request HTTP request to retrieve cookies for authentication and messages
+     * @param response HTTP response for cookie management
+     * @return the event list view or redirect to signin if not authenticated
+     */
     @GetMapping("/event_list")
     public String getAllEvents(Model model, HttpServletRequest request, HttpServletResponse response) {
         List<Event> events = service.findAllEvents();
@@ -341,6 +406,7 @@ public class EventController {
         String authToken = null;
         String message = null;
 
+        // Extract authentication token and flash messages from cookies
         Cookie[] cookies = request.getCookies();
         if(cookies != null) {
             for(var cookie : cookies) {
@@ -351,6 +417,7 @@ public class EventController {
                     try {
                         String decodedMessage = URLDecoder.decode(cookie.getValue(), "UTF-8");
                         message = decodedMessage;
+                        // Clear the message cookie after reading
                         Cookie msgCookie = new Cookie("message", null);
                         msgCookie.setMaxAge(0);
                         response.addCookie(msgCookie);
@@ -360,6 +427,8 @@ public class EventController {
                 }
             }
         }
+        
+        // Authenticate user
         var user = new User();
         if(authToken != null) {
             if(userService.validateToken(authToken)) {
@@ -372,11 +441,13 @@ public class EventController {
             return "redirect:/signin";
         }
 
+        // Pass flash message to view if present
         if(message != null) {
             model.addAttribute("message", message);
             System.out.println("added this attribute " + message);
         }
 
+        // Update status of all events before display
         for (Event event : events) {
             event.setStatus(resetStatus(event));
             service.createOrUpdateEvent(event, user);

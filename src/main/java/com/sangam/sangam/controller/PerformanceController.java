@@ -27,6 +27,10 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Controller responsible for managing performance and participation registrations for events
+ * Handles creation, check-in, editing, and communication with participants
+ */
 @Controller
 public class PerformanceController {
 
@@ -37,6 +41,13 @@ public class PerformanceController {
     @Autowired
     private SendEmailService emailService;
     
+    /**
+     * Displays the performance registration form for an event
+     * 
+     * @param eventId ID of the event to register a performance for
+     * @param model Spring MVC Model for view attributes
+     * @return the performance registration view
+     */
     @GetMapping("/performance/{eventId}")
     public String showPerformancePage(@PathVariable String eventId, Model model) {
         Event event = eventService.findEventById(eventId);
@@ -120,6 +131,13 @@ public class PerformanceController {
         return "redirect:/dashboard";
     }
 
+    /**
+     * Toggles the check-in status of a participant
+     * If already checked in, will uncheck them
+     * 
+     * @param partiCode ID of the participation record to toggle
+     * @return redirect to the participant list view filtered by event
+     */
     @GetMapping("/participation/checkin/{partiCode}")
     public String checkInParticipant(@PathVariable String partiCode) {
         var participation = participationService.getParticipationById(partiCode);
@@ -127,6 +145,7 @@ public class PerformanceController {
         if(participation.isPresent() && !participation.isEmpty()) {
             var part = participation.get();
             eventId = part.getEventId();
+            // Toggle check-in status
             if(part.getCheckedIn() == 0) {
                 part.setCheckedIn(1);
             } else if (part.getCheckedIn() == 1) {
@@ -135,6 +154,7 @@ public class PerformanceController {
             participationService.addOrUpdateParticipation(part);
         }
         
+        // Redirect back to filtered participant list
         if (eventId != null && !eventId.isEmpty()) {
             try {
                 return "redirect:/participant_list?eventId=" + URLEncoder.encode(eventId, "UTF-8");
@@ -196,10 +216,19 @@ public class PerformanceController {
             return "redirect:/participant_list";
     }
 
+    /**
+     * Initiates sending of performance details emails to all participants
+     * Triggers an asynchronous process to avoid blocking the response
+     * 
+     * @param eventId Optional event ID to filter the redirect
+     * @return redirect to the participant list view
+     * @throws various exceptions that could occur during email sending
+     */
     @GetMapping("participation/details/send")
     public String sendBulkParticipationDetails(@RequestParam(value = "eventId", required = false) String eventId) throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, MessagingException, IOException, TemplateException {
         sendBulkEmailsParticipation();
         
+        // Redirect back to filtered participant list
         if (eventId != null && !eventId.isEmpty()) {
             try {
                 return "redirect:/participant_list?eventId=" + URLEncoder.encode(eventId, "UTF-8");
@@ -210,6 +239,12 @@ public class PerformanceController {
         return "redirect:/participant_list";
     }
 
+    /**
+     * Asynchronously sends performance details emails to all participants
+     * Run in background to avoid blocking the web request
+     * 
+     * @throws various exceptions that could occur during email sending
+     */
     @Async
     public void sendBulkEmailsParticipation() throws TemplateNotFoundException, MalformedTemplateNameException, ParseException, MessagingException, IOException, TemplateException {
         var participations = participationService.getAllParticipation();
