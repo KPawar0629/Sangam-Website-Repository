@@ -96,7 +96,7 @@
                         </a>
                         <ul class="dropdown-menu p-2">
                             <#if loggedInUser.role == "admin" || loggedInUser.role == "staff">
-                            <li><a class="dropdown-item text-center" href="/itemstock">Item Stock</a></li>
+                            <li><a class="dropdown-item text-center" href="/itemstock">Stock Management</a></li>
                             </#if>
                             <#if loggedInUser.role == "admin">
                             <li><a class="dropdown-item text-center" href="/user_list">All Users</a></li>

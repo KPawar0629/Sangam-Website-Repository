@@ -31,7 +31,7 @@
                                 </a>
                                 <a href="/payment/all/${event.eventId}" type="button" class="btn btn-info" 
                                    title="Send Payment Reminder" onclick="return confirm('Are you sure you want to send reminder for payment for ${event.eventName}?')">
-                                    <i class="fa-solid fa-envelope"></i> Send Reminder
+                                    <i class="fa-solid fa-envelope"></i> Send Payment Reminder
                                 </a>
                             </#if>
                             <button type="submit" class="btn btn-success">${event.eventId?has_content?then('Update', 'Save')}</button>
@@ -197,12 +197,15 @@
 
                 <div>
                     <div class="row border-bottom-0">
-                        <div class="col-sm-10"><h3>Pricing Details</h3></div>
+                        <div class="col-sm-10">
+                            <h3>Pricing Details</h3>
+                            <#if event.status != "active" && event.status != "Active">
+                                <p class="text-muted"><small>Pricing can only be modified when the event is active</small></p>
+                            </#if>
+                        </div>
                         <div class="col-sm-2 text-end">
                             <#if event.status == "active" || event.status == "Active">
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPricing">+ Add Pricing</button>
-                            <#else>
-                                <span class="text-muted"><small>Pricing can only be modified when the event is active</small></span>
                             </#if>
                         </div>
                     </div>

@@ -1,5 +1,10 @@
+C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\config\SecurityConfig.java
+C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\config\WebConfig.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\Configurer\FreeMarkerConfig.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\Configurer\WebConfig.java
+C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\CustomErrorController.java
+C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\DashboardController.java
+C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\DonateController.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\EventController.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\EventPricingController.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\ItemStockController.java
@@ -26,6 +31,7 @@ C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\s
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\TicketMasterRepository.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\UserRepository.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\SangamApplication.java
+C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\AuthenticationService.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\DressCompetitionService.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\EventPricingService.java
 C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\EventService.java

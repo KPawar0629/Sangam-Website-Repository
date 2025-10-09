@@ -24,21 +24,16 @@
         <div id="main-content">
             <div class="container mt-3">
                 <div class="row mb-3">
-                    <h3 class="col-12 col-lg-6">Check In Tickets</h3>
-                    <div class="col-12 col-sm-6 col-lg-2">
-                        <button id="toggleButton" class="btn btn-success">Show All</button>
+                    <h3 class="col-12 col-lg-6">
+                        Check In Tickets
+                        <#if selectedEventId?? && selectedEventId != "" && eventsMap[selectedEventId]??>
+                            <span class="fs-5 text-muted">- ${eventsMap[selectedEventId].eventName}</span>
+                        </#if>
+                    </h3>
+                    <div class="col-12 col-sm-6 col-lg-3">
+                        <button id="toggleButton" class="btn btn-success w-100">Show All</button>
                     </div>
-                    <div class="col-12 col-sm-6 col-lg-2">
-                        <select class="form-select" id="eventFilter" onchange="filterByEvent()">
-                            <option value="">All Events</option>
-                            <#list events as event>
-                                <option value="${event.eventId}" <#if selectedEventId?? && selectedEventId == event.eventId>selected</#if>>
-                                    ${event.eventName}
-                                </option>
-                            </#list>
-                        </select>
-                    </div>
-                    <div class="col-12 col-lg-2">
+                    <div class="col-12 col-lg-3">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1">&#128270</span>
                             <input class="form-control" type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Search names...">
@@ -47,6 +42,9 @@
                 </div>
 
                 <form action="/confirmCheckIn" method="post" id="checkInForm">
+                    <#if selectedEventId?? && selectedEventId != "">
+                        <input type="hidden" name="eventId" value="${selectedEventId}">
+                    </#if>
                     <div>
                         <div class="row d-flex align-items-end">
                             <button type="submit" class="btn btn-primary mb-3">Check In Selected</button>
@@ -229,18 +227,7 @@
         myModal.show();
     });
 
-    function filterByEvent() {
-        const selectedEventId = document.getElementById('eventFilter').value;
-        const currentUrl = new URL(window.location);
-        
-        if (selectedEventId) {
-            currentUrl.searchParams.set('eventId', selectedEventId);
-        } else {
-            currentUrl.searchParams.delete('eventId');
-        }
-        
-        window.location.href = currentUrl.toString();
-    }
+    // Event filter removed
 
     
 </script>

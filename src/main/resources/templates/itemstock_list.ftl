@@ -1,11 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
-    <link href="/css/style.css" rel="stylesheet" type="text/css" />
+    <title>Stock Management - Sangam</title>
+    <link rel="icon" type="image/x-icon" href="/imgs/logo.jpg">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link href="/css/style.css" rel="stylesheet" type="text/css"/>
     <link href="/css/others.css" rel="stylesheet" type="text/css" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <title>Item Stock Management</title>
+    <script src="https://kit.fontawesome.com/6e1d51a9e9.js" crossorigin="anonymous"></script>
     <style>
         .table-hover tbody tr:hover {
             background-color: #f5f5f5;
@@ -18,7 +22,7 @@
             color: red;
             font-weight: bold;
         }
-        .item-actions {
+        .stock-actions {
             display: flex;
             gap: 10px;
         }
@@ -63,8 +67,8 @@
                 border-bottom: 4px solid #e9ecef;
             }
             
-            /* Make the item name stand out more */
-            .item-name {
+            /* Make the stock name stand out more */
+            .stock-name {
                 font-weight: bold;
                 font-size: 1.05rem;
                 color: #000;
@@ -89,22 +93,23 @@
     </style>
 </head>
 <body>
+    <div class="d-flex flex-column min-vh-100">
     <#include "nav.ftl">
     
-    <div class="container mt-4">
+    <main class="container mt-3 flex-grow-1">
         <div class="row">
             <div class="col-12">
-                <h2 class="text-center mb-4">Item Stock Management</h2>
+                <h2 class="text-center mb-4">Stock Management</h2>
                 
                 <div class="search-container row">
                     <div class="col-md-6">
                         <form action="/itemstock" method="GET" class="d-flex">
-                            <input type="text" name="search" class="form-control me-2" placeholder="Search by item name...">
+                            <input type="text" name="search" class="form-control me-2" placeholder="Search by stock name...">
                             <button type="submit" class="btn btn-primary">Search</button>
                         </form>
                     </div>
                     <div class="col-md-6 text-end">
-                        <a href="/itemstock/add" class="btn btn-success">Add New Item</a>
+                        <a href="/itemstock/add" class="btn btn-success">Add New Stock</a>
                     </div>
                 </div>
                 
@@ -112,7 +117,7 @@
                     <table class="table table-bordered table-hover">
                         <thead class="table-dark">
                             <tr>
-                                <th>Item Name</th>
+                                <th>Stock Name</th>
                                 <th class="mobile-only">Handler & Status</th>
                                 <th class="desktop-only">Purchase Date</th>
                                 <th class="desktop-only">Amount</th>
@@ -125,7 +130,7 @@
                                 <#list itemStockList as item>
                                     <tr>
                                         <td>
-                                            <a href="/itemstock/edit/${item.stockId}" class="item-name" style="text-decoration: none;">${item.itemName}</a>
+                                            <a href="/itemstock/edit/${item.stockId}" class="stock-name" style="text-decoration: none;">${item.itemName}</a>
                                             <!-- Add action buttons for mobile but with dropdown -->
                                             <div class="d-flex d-md-none mt-2">
                                                 <div class="dropdown">
@@ -139,7 +144,7 @@
                                                         </a></li>
                                                         <#if loggedInUser?? && loggedInUser.role == "admin">
                                                             <li><a class="dropdown-item text-danger" href="/itemstock/delete/${item.stockId}" 
-                                                                onclick="return confirm('Are you sure you want to delete this item?')">Delete</a></li>
+                                                                onclick="return confirm('Are you sure you want to delete this stock?')">Delete</a></li>
                                                         </#if>
                                                     </ul>
                                                 </div>
@@ -174,7 +179,7 @@
                                 </#list>
                             <#else>
                                 <tr>
-                                    <td colspan="8" class="text-center">No items found</td>
+                                    <td colspan="8" class="text-center">No stocks found</td>
                                 </tr>
                             </#if>
                         </tbody>
@@ -182,6 +187,11 @@
                 </div>
             </div>
         </div>
+    </main>
+    
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
+    </footer>
     </div>
 </body>
 </html>

@@ -1,18 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
-    <link href="/css/style.css" rel="stylesheet" type="text/css" />
-    <link href="/css/others.css" rel="stylesheet" type="text/css" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <title><#if isEdit>Edit<#else>Add</#if> Item Stock</title>
+    <title><#if isEdit>Edit<#else>Add</#if> Stock - Sangam</title>
+    <link rel="icon" type="image/x-icon" href="/imgs/logo.jpg">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <link href="/css/style.css" rel="stylesheet" type="text/css"/>
+    <script src="https://kit.fontawesome.com/6e1d51a9e9.js" crossorigin="anonymous"></script>
     <style>
-        .form-container {
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
         .required-field::after {
             content: "*";
             color: red;
@@ -21,13 +18,13 @@
     </style>
 </head>
 <body>
+<div class="d-flex flex-column min-vh-100">
     <#include "nav.ftl">
     
-    <div class="container mt-4">
+    <main class="container mt-3 flex-grow-1">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="form-container">
-                    <h2 class="text-center mb-4"><#if isEdit>Edit<#else>Add New</#if> Item</h2>
+                    <h2 class="text-center mb-4"><#if isEdit>Edit<#else>Add New</#if> Stock</h2>
                     
                     <form action="/itemstock/save" method="POST">
                         <#if isEdit>
@@ -36,14 +33,14 @@
                         </#if>
                         
                         <div class="mb-3">
-                            <label for="itemName" class="form-label required-field">Item Name</label>
-                            <input type="text" class="form-control" id="itemName" name="itemName" 
+                            <label for="stockName" class="form-label required-field">Stock Name</label>
+                            <input type="text" class="form-control" id="stockName" name="itemName" 
                                 value="<#if itemStock.itemName??>${itemStock.itemName}</#if>" required>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="itemDescription" class="form-label">Item Description</label>
-                            <textarea class="form-control" id="itemDescription" name="itemDescription" rows="3"><#if itemStock.itemDescription??>${itemStock.itemDescription}</#if></textarea>
+                            <label for="stockDescription" class="form-label">Stock Description</label>
+                            <textarea class="form-control" id="stockDescription" name="itemDescription" rows="3"><#if itemStock.itemDescription??>${itemStock.itemDescription}</#if></textarea>
                         </div>
                         
                         <div class="mb-3">
@@ -70,28 +67,31 @@
                                         <option value="${loggedInUser.userId}">${loggedInUser.fullName} (You)</option>
                                     </#if>
                                 </select>
-                                <div class="form-text">Select an admin user to handle this item.</div>
+                                <div class="form-text">Select an admin user to handle this stock.</div>
                             </div>
                         </#if>
                         
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="isActive" name="active" 
                                 <#if itemStock.active?? && itemStock.active>checked</#if>>
-                            <label class="form-check-label" for="isActive">Item is active</label>
+                            <label class="form-check-label" for="isActive">Stock is active</label>
                         </div>
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <#if isEdit && loggedInUser.role == "admin">
                                 <a href="/itemstock/delete/${itemStock.stockId}" class="btn btn-danger me-auto" 
-                                   onclick="return confirm('Are you sure you want to delete this item?')">Delete Item</a>
+                                   onclick="return confirm('Are you sure you want to delete this stock?')">Delete Stock</a>
                             </#if>
                             <a href="/itemstock" class="btn btn-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Save Item</button>
+                            <button type="submit" class="btn btn-primary">Save Stock</button>
                         </div>
                     </form>
-                </div>
             </div>
         </div>
-    </div>
+    </main>
+    <footer class="bg-dark text-white text-center py-3 mt-auto">
+        <p>2025 Sangam &copy;. All Rights reserved.</p>
+    </footer>
+</div>
 </body>
 </html>

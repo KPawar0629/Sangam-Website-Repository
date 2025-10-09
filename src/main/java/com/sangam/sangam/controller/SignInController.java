@@ -130,7 +130,7 @@ public class SignInController {
                 e.printStackTrace();
             }
 
-            return "redirect:/dashboard";
+            return "redirect:/event_list";
         } else {
             model.addAttribute("message", "Invalid email or password");
             return "signin";
@@ -487,7 +487,10 @@ public class SignInController {
     // }
 
     @PostMapping("/confirmCheckIn")
-    public String confirmCheckIn(@RequestParam("ticketIds") String[] ticketIds, HttpServletRequest request) {
+    public String confirmCheckIn(
+            @RequestParam("ticketIds") String[] ticketIds, 
+            @RequestParam(value = "eventId", required = false) String eventId,
+            HttpServletRequest request) {
         String authToken = null;
 
         Cookie[] cookies = request.getCookies();
@@ -523,7 +526,10 @@ public class SignInController {
             }
         }
 
-        return "redirect:/checkin";
+        // Redirect back to the check-in page, preserving the event filter if specified
+        return eventId != null && !eventId.isEmpty() 
+            ? "redirect:/checkin?eventId=" + eventId
+            : "redirect:/checkin";
     }
 
     @GetMapping("/event/stats/{eventId}")

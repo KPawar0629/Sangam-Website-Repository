@@ -452,7 +452,10 @@ public class EventController {
             event.setStatus(resetStatus(event));
             service.createOrUpdateEvent(event, user);
         }
-        model.addAttribute("events", events);
+        
+        // Sort events: Active events first (by date), then other statuses
+        List<Event> sortedEvents = service.getSortedEventsByStatus(events);
+        model.addAttribute("events", sortedEvents);
         return "/event_list";
     }
 

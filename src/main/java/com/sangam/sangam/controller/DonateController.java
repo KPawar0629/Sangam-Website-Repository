@@ -32,27 +32,6 @@ public class DonateController {
      */
     @GetMapping("/donate")
     public String donatePage(Model model, HttpServletResponse response, HttpServletRequest request) {
-        String authToken = null;
-
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            for(var cookie : cookies) {
-                if(cookie.getName().equals("authToken")) {
-                    authToken = cookie.getValue();
-                }
-            }
-        }
-        var user = new User();
-        if(authToken != null) {
-            if(userService.validateToken(authToken)) {
-                user = userService.getUserByToken(authToken).get();
-                model.addAttribute("loggedInUser", user);
-            } else {
-                return "redirect:/signin";
-            }
-        } else {
-            return "redirect:/signin";
-        }
         return "donate";
     }
 }

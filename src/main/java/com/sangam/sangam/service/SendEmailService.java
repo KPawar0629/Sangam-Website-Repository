@@ -48,8 +48,8 @@ public class SendEmailService {
     @Autowired
     private FreeMarkerConfigurer freeMarkerConfigurer;
 
-    // private String fromEmailId = "sbdesis@gmail.com";
-    private String fromEmailId = "inception.kaustubh@gmail.com";
+    private String fromEmailId = "sbdesis@gmail.com";
+    // private String fromEmailId = "inception.kaustubh@gmail.com";
 
     @Async
     public void sendPaymentEmailAsync(String recipient, Model model) {

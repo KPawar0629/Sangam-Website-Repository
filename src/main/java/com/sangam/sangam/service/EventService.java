@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -137,5 +139,44 @@ public class EventService {
         LocalDate today = LocalDate.now();
 
         return !today.isBefore(startDate) && !today.isAfter(endDate);
+    }
+    
+    /**
+     * Sorts events by status and date
+     * Active events first (sorted by date), followed by other statuses
+     * 
+     * @param events List of events to sort
+     * @return Sorted list of events
+     */
+    public List<Event> getSortedEventsByStatus(List<Event> events) {
+        // Define DateTimeFormatter to parse event dates
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy");
+        
+        // Sort events: Active events first (by date), then other statuses
+        events.sort((e1, e2) -> {
+            boolean isActive1 = "Active".equalsIgnoreCase(e1.getStatus());
+            boolean isActive2 = "Active".equalsIgnoreCase(e2.getStatus());
+            
+            // If both are active, sort by date
+            if (isActive1 && isActive2) {
+                try {
+                    ZonedDateTime date1 = ZonedDateTime.parse(e1.getEventDateTime(), formatter.withZone(ZoneId.of("America/Los_Angeles")));
+                    ZonedDateTime date2 = ZonedDateTime.parse(e2.getEventDateTime(), formatter.withZone(ZoneId.of("America/Los_Angeles")));
+                    return date1.compareTo(date2);
+                } catch (Exception e) {
+                    // Fall back to string comparison if date parsing fails
+                    return e1.getEventDateTime().compareTo(e2.getEventDateTime());
+                }
+            }
+            
+            // If only one is active, it comes first
+            if (isActive1) return -1;
+            if (isActive2) return 1;
+            
+            // If neither is active, maintain original order
+            return 0;
+        });
+        
+        return events;
     }
 }

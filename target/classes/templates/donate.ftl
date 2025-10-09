@@ -133,11 +133,13 @@
                     </div>
                 </div>
                 
-                <!-- Nonprofit Information Section -->
-                <div class="text-center mt-5 mb-4">
-                    <div class="bg-light p-4 rounded shadow-sm">
-                        <p class="mb-2 fw-bold text-primary">SANGAM Santa Barbara Inc. is a 501(c)(3) nonprofit public Organization!</p>
-                        <p class="text-primary mb-0"><strong>Federal Tax ID:</strong> 39-3121864</p>
+                <!-- Nonprofit Information -->
+                <div class="text-center mt-4 mb-4">
+                    <div class="alert alert-info d-inline-block" role="alert">
+                        <i class="fa-solid fa-heart text-primary"></i>
+                        <strong>SANGAM Santa Barbara Inc.</strong> is a <strong>501(c)(3) Non-Profit Public Organization.</strong><br>
+                        <small class="text-muted">Federal Tax ID: 39-3121864</small><br>
+                        <small class="text-muted"> Your contributions support our community programs.</small>
                     </div>
                 </div>
             </div>
