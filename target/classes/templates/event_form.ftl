@@ -15,6 +15,50 @@
 <div class="d-flex flex-column min-vh-100">
     <#include "nav.ftl">
     <link href="/css/style.css" rel="stylesheet" type="text/css"/>
+    <style>
+        /* Fix horizontal scrolling issue */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Ensure all elements stay within container boundaries */
+        .container {
+            max-width: 100%;
+            padding-left: 15px;
+            padding-right: 15px;
+            overflow-x: hidden;
+        }
+        
+        /* Ensure all rows don't cause overflow */
+        .row {
+            margin-left: 0;
+            margin-right: 0;
+            width: 100%;
+        }
+        
+        /* Ensure all inputs don't overflow */
+        input, textarea, select {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        /* Fix for any potential table overflow */
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        /* Add proper box-sizing to all elements */
+        * {
+            box-sizing: border-box;
+        }
+        
+        /* Fix for date inputs */
+        input[type="datetime-local"] {
+            width: 100%;
+        }
+    </style>
     <main class="container mt-3 flex-grow-1">
         <form action="/events" method="post">
             <div class="container mt-3">
@@ -196,7 +240,7 @@
                 <hr>
 
                 <div>
-                    <div class="row border-bottom-0">
+                    <div class="row border-bottom-0 mb-4">
                         <div class="col-sm-10">
                             <h3>Pricing Details</h3>
                             <#if event.status != "active" && event.status != "Active">
@@ -209,43 +253,279 @@
                             </#if>
                         </div>
                     </div>
-                    <table class="table mt-4 table-striped">
-                        <thead>
-                        <tr>
-                            <th>Ticket Type</th>
-                            <th>Description</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Rate Per Ticket</th>
-                            <#if event.status == "active" || event.status == "Active">
-                                <th>Actions</th>
-                            </#if>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <#list eventPricings as pricing>
-                            <tr>
-                                <td>${pricing.pricingName}</td>
-                                <td>${pricing.pricingDesc}</td>
-                                <td>${pricing.startDate}</td>
-                                <td>${pricing.endDate}</td>
-                                <td>$${pricing.pricingRate}</td>
-                                <#if event.status == "active" || event.status == "Active">
-                                <td>
-                                    <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addPricing"
-                                    data-id="${pricing.id}"
-                                    data-tickettype = "${pricing.pricingName}"
-                                    data-description = "${pricing.pricingDesc}"
-                                    data-rate="${pricing.pricingRate}"
-                                    data-startdate="${pricing.startDate}"
-                                    data-enddate="${pricing.endDate}" title="Edit Pricing"><i class="fa-solid fa-pen"></i></a>
-                                    <a href="/event_pricing/delete/${pricing.id}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this pricing?')" title="Delete Pricing"><i class="fa-solid fa-trash"></i></a>
-                                </td>
-                                </#if>
-                            </tr>
-                        </#list>
-                        </tbody>
-                    </table>
+                    
+                    <style>
+                        .pricing-box {
+                            border-radius: 8px;
+                            padding: 25px;
+                            margin-bottom: 20px;
+                            height: 100%;
+                            display: flex;
+                            flex-direction: column;
+                            background-color: #ffffff;
+                            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+                            transition: all 0.2s ease;
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        
+                        .pricing-box:not(.expired):hover {
+                            transform: translateY(-5px);
+                            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+                        }
+                        
+                        /* Styles for expired pricing */
+                        .pricing-box.expired {
+                            background-color: #ffeeee;
+                            box-shadow: 0 2px 12px rgba(220,53,69,0.08);
+                            opacity: 0.85;
+                            pointer-events: none; /* Disable hover events on the box */
+                        }
+                        
+                        .pricing-box.expired::before {
+                            content: "EXPIRED";
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+                            background-color: rgba(220,53,69,0.2);
+                            color: #dc3545;
+                            font-size: 0.7rem;
+                            font-weight: bold;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            letter-spacing: 0.5px;
+                        }
+                        
+                        /* Re-enable pointer events on the action buttons */
+                        .pricing-box.expired .pricing-actions {
+                            pointer-events: auto;
+                        }
+                        
+                        .price {
+                            font-size: 2.8rem;
+                            font-weight: bold;
+                            color: #198754;
+                            text-align: center;
+                            margin-top: 5px;
+                            margin-bottom: 15px;
+                            line-height: 1;
+                        }
+                        
+                        .price::after {
+                            content: '';
+                            display: block;
+                            width: 40px;
+                            height: 3px;
+                            background-color: #198754;
+                            margin: 12px auto 10px;
+                            border-radius: 2px;
+                        }
+                        
+                        .expired .price {
+                            color: #dc3545;
+                            opacity: 0.7;
+                        }
+                        
+                        .expired .price::after {
+                            background-color: #dc3545;
+                            opacity: 0.5;
+                        }
+                        
+                        .expired .ticket-name,
+                        .expired .ticket-desc,
+                        .expired .date-badge {
+                            opacity: 0.75;
+                        }
+                        
+                        .expired .date-badge {
+                            background-color: rgba(220,53,69,0.05);
+                            border-color: rgba(220,53,69,0.2);
+                        }
+                        
+                        .expired .date-badge i {
+                            color: rgba(220,53,69,0.6);
+                        }
+                        
+                        .ticket-name {
+                            font-size: 1.5rem;
+                            font-weight: 600;
+                            color: #333;
+                            text-align: center;
+                            margin-bottom: 8px;
+                        }
+                        
+                        .ticket-desc {
+                            font-size: 1rem;
+                            color: #666;
+                            text-align: center;
+                            margin-bottom: 20px;
+                            flex-grow: 1;
+                        }
+                        
+                        .ticket-dates {
+                            font-size: 0.9rem;
+                            color: #666;
+                            text-align: center;
+                            margin-bottom: 20px;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 8px;
+                        }
+                        
+                        .date-badge {
+                            background-color: #f8f9fa;
+                            padding: 8px 12px;
+                            border-radius: 6px;
+                            display: block;
+                            font-size: 0.9rem;
+                            color: #555;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            border: 1px solid #eaeaea;
+                            box-sizing: border-box;
+                        }
+                        
+                        .date-badge i {
+                            margin-right: 8px;
+                            color: #198754;
+                        }
+                        
+                        .pricing-actions {
+                            display: flex;
+                            justify-content: center;
+                            gap: 10px;
+                            margin-top: auto;
+                            padding-top: 15px;
+                            border-top: 1px solid #eee;
+                        }
+                        
+                        .pricing-actions .btn {
+                            padding: 8px 16px;
+                            font-weight: 500;
+                            transition: all 0.2s;
+                        }
+                        
+                        .pricing-actions .btn:hover {
+                            transform: translateY(-2px);
+                        }
+                        
+                        /* Responsive adjustments */
+                        @media (max-width: 767px) {
+                            .row-cols-md-2 {
+                                row-gap: 20px;
+                            }
+                            
+                            .pricing-box {
+                                min-height: 320px;
+                                padding: 20px 15px;
+                            }
+                            
+                            .price {
+                                font-size: 2.5rem;
+                                margin-bottom: 12px;
+                            }
+                            
+                            .ticket-name {
+                                font-size: 1.3rem;
+                            }
+                            
+                            .ticket-desc {
+                                font-size: 0.95rem;
+                            }
+                        }
+                        
+                        @media (max-width: 576px) {
+                            .row-cols-1 {
+                                row-gap: 20px;
+                            }
+                            
+                            .pricing-box {
+                                padding: 20px 15px;
+                                min-height: 280px;
+                            }
+                            
+                            .price {
+                                font-size: 2.4rem;
+                                margin-bottom: 10px;
+                            }
+                            
+                            .pricing-actions {
+                                flex-direction: row;
+                                gap: 10px;
+                            }
+                            
+                            .pricing-actions .btn {
+                                flex: 1;
+                                justify-content: center;
+                            }
+                        }
+                    </style>
+                    
+                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mx-0 w-100">
+                        <#if eventPricings?size == 0 && (event.status == "active" || event.status == "Active")>
+                            <div class="col">
+                                <div class="pricing-box d-flex align-items-center justify-content-center">
+                                    <div class="text-center">
+                                        <div class="mb-3 text-muted">
+                                            <i class="fa-solid fa-ticket fa-3x"></i>
+                                        </div>
+                                        <h4>No Pricing Options</h4>
+                                        <p>Click the "Add Pricing" button to create your first pricing option.</p>
+                                        <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addPricing">
+                                            <i class="fa-solid fa-plus"></i> Add Pricing
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        <#elseif eventPricings?size == 0>
+                            <div class="col">
+                                <div class="pricing-box d-flex align-items-center justify-content-center">
+                                    <div class="text-center">
+                                        <div class="mb-3 text-muted">
+                                            <i class="fa-solid fa-ticket fa-3x"></i>
+                                        </div>
+                                        <h4>No Pricing Options</h4>
+                                        <p>No pricing options have been added to this event yet.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <#else>
+                            <#list eventPricings as pricing>
+                                <div class="col">
+                                    <div class="pricing-box">
+                                        <div class="price">$${pricing.pricingRate}</div>
+                                        <div class="ticket-name">${pricing.pricingName}</div>
+                                        <div class="ticket-desc">${pricing.pricingDesc!''}</div>
+                                        <div class="ticket-dates">
+                                            <span class="date-badge" title="${pricing.startDate}">
+                                                <i class="fa-regular fa-calendar"></i> From: ${pricing.startDate?substring(0,10)}
+                                            </span>
+                                            <span class="date-badge" title="${pricing.endDate}">
+                                                <i class="fa-regular fa-calendar-check"></i> To: ${pricing.endDate?substring(0,10)}
+                                            </span>
+                                        </div>
+                                        <#if event.status == "active" || event.status == "Active">
+                                            <div class="pricing-actions">
+                                                <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addPricing"
+                                                   data-id="${pricing.id}"
+                                                   data-tickettype="${pricing.pricingName}"
+                                                   data-description="${pricing.pricingDesc}"
+                                                   data-rate="${pricing.pricingRate}"
+                                                   data-startdate="${pricing.startDate}"
+                                                   data-enddate="${pricing.endDate}" title="Edit Pricing">
+                                                    <i class="fa-solid fa-pen"></i> Edit
+                                                </a>
+                                                <a href="/event_pricing/delete/${pricing.id}" class="btn btn-danger" 
+                                                   onclick="return confirm('Are you sure you want to delete this pricing?')" title="Delete Pricing">
+                                                    <i class="fa-solid fa-trash"></i> Delete
+                                                </a>
+                                            </div>
+                                        </#if>
+                                    </div>
+                                </div>
+                            </#list>
+                        </#if>
+                    </div>
                     <div class="modal fade" id="addPricing">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -269,11 +549,11 @@
                                         </div>
                                         <div class="mb-3">
                                             <label for="startDate">Start Date:</label>
-                                            <input id="startDate" type="datetime-local" name="startDate" value="${(pricing.startDate)!}" required>
+                                            <input id="startDate" type="datetime-local" class="form-control" name="startDate" value="${(pricing.startDate)!}" required>
                                         </div>
                                         <div class="mb-3">
                                             <label for="endDate">End Date:</label>
-                                            <input id="endDate" type="datetime-local" name="endDate" value="${(pricing.endDate)!}" required>
+                                            <input id="endDate" type="datetime-local" class="form-control" name="endDate" value="${(pricing.endDate)!}" required>
                                         </div>
                                         <div class="mb-3">
                                             <label for="ratePerTicket">Rate Per Ticket:</label>
@@ -302,7 +582,7 @@
             <p>2025 Sangam &copy;. All Rights reserved.</p>
         </footer>
 </div>
-<script>
+    <script>
     let addPricingModal = document.getElementById('addPricing');
     addPricingModal.addEventListener('show.bs.modal', function (event) {
         // Button that triggered the modal
@@ -337,6 +617,9 @@
         hiddenIdInput.value = id;
     });
     document.addEventListener('DOMContentLoaded', function () {
+        // Check for expired pricing options
+        checkExpiredPricingOptions();
+        
         // Initialize RSVP controls if they exist
         const yesRsvp = document.getElementById('yesRsvp');
         if (yesRsvp && yesRsvp.checked) {
@@ -390,8 +673,32 @@
             });
         }
     });
-
-    function showHide(val) {
+    
+    // Function to check if pricing options are expired and mark them accordingly
+    function checkExpiredPricingOptions() {
+        const today = new Date();
+        const pricingBoxes = document.querySelectorAll('.pricing-box');
+        
+        pricingBoxes.forEach(box => {
+            // Find the end date badge inside this pricing box
+            const endDateElement = box.querySelector('.date-badge:last-child');
+            if (endDateElement) {
+                // Extract the date string - format is "From: YYYY-MM-DD" or "To: YYYY-MM-DD"
+                const dateText = endDateElement.textContent.trim();
+                const dateMatch = dateText.match(/To: (\d{4}-\d{2}-\d{2})/);
+                
+                if (dateMatch && dateMatch[1]) {
+                    const endDate = new Date(dateMatch[1]);
+                    endDate.setHours(23, 59, 59); // Set to end of day
+                    
+                    // Check if end date has passed
+                    if (endDate < today) {
+                        box.classList.add('expired');
+                    }
+                }
+            }
+        });
+    }    function showHide(val) {
         const yesDiv = document.getElementById('yesDiv');
         if(val==1) {
             yesDiv.classList.remove('d-none');
