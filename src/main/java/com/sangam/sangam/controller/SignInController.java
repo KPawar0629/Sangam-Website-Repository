@@ -130,7 +130,7 @@ public class SignInController {
                 e.printStackTrace();
             }
 
-            return "redirect:/dashboard";
+            return "redirect:/event_list";
         } else {
             model.addAttribute("message", "Invalid email or password");
             return "signin";

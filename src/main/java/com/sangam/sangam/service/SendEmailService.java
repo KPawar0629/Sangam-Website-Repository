@@ -2,6 +2,7 @@ package com.sangam.sangam.service;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import com.sangam.sangam.model.Event;
 import com.sangam.sangam.model.TicketMaster;
 import com.sangam.sangam.model.TicketDetails;
+import com.sangam.sangam.util.QRCodeGenerator;
 
 import freemarker.core.ParseException;
 import freemarker.template.Configuration;
@@ -25,8 +27,10 @@ import freemarker.template.MalformedTemplateNameException;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateNotFoundException;
+import jakarta.activation.DataSource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.util.ByteArrayDataSource;
 
 @Service
 public class SendEmailService {
@@ -48,8 +52,8 @@ public class SendEmailService {
     @Autowired
     private FreeMarkerConfigurer freeMarkerConfigurer;
 
-    private String fromEmailId = "sbdesis@gmail.com";
-    // private String fromEmailId = "inception.kaustubh@gmail.com";
+    // private String fromEmailId = "sbdesis@gmail.com";
+    private String fromEmailId = "inception.kaustubh@gmail.com";
 
     @Async
     public void sendPaymentEmailAsync(String recipient, Model model) {
@@ -249,5 +253,139 @@ public class SendEmailService {
         } catch (Exception e) {
             throw new MessagingException("Failed to process FreeMarker template", e);
         }
+    }
+
+    /**
+     * Bulk sends ticket emails with QR codes to all PAID ticket masters for a specific event
+     * Only sends to ticket holders who have completed payment (paymentReceived == 1)
+     * 
+     * @param eventId ID of the event to send tickets for
+     * @return Map containing success count, failure count, and skipped count
+     */
+    public Map<String, Integer> bulkSendTicketEmailsWithQR(String eventId) {
+        Map<String, Integer> result = new HashMap<>();
+        result.put("success", 0);
+        result.put("failure", 0);
+        result.put("skipped", 0);
+        
+        try {
+            System.out.println("Starting bulk send of ticket emails with QR codes for event: " + eventId);
+            
+            // Get event details
+            Event event = eventService.findEventById(eventId);
+            if (event == null) {
+                throw new IllegalArgumentException("Event not found with ID: " + eventId);
+            }
+            
+            // Get all ticket masters for this event
+            List<TicketMaster> allTicketMasters = ticketMasterService.findTicketMasterByEventId(eventId);
+            
+            if (allTicketMasters == null || allTicketMasters.isEmpty()) {
+                System.out.println("No ticket masters found for event: " + eventId);
+                return result;
+            }
+            
+            // Filter to only include ticket masters who have paid
+            List<TicketMaster> paidTicketMasters = new ArrayList<>();
+            for (TicketMaster ticketMaster : allTicketMasters) {
+                if (ticketMaster.getPaymentReceived() == 1) {
+                    paidTicketMasters.add(ticketMaster);
+                }
+            }
+            
+            if (paidTicketMasters.isEmpty()) {
+                System.out.println("No paid ticket masters found for event: " + eventId);
+                System.out.println("Total ticket masters: " + allTicketMasters.size() + ", Paid: 0");
+                result.put("skipped", allTicketMasters.size());
+                return result;
+            }
+            
+            System.out.println("Found " + paidTicketMasters.size() + " paid ticket masters out of " + allTicketMasters.size() + " total");
+            int successCount = 0;
+            int failureCount = 0;
+            int skippedCount = allTicketMasters.size() - paidTicketMasters.size();
+            
+            // Send email to each PAID ticket master
+            for (TicketMaster ticketMaster : paidTicketMasters) {
+                try {
+                    sendTicketEmailWithQR(ticketMaster, event);
+                    successCount++;
+                    System.out.println("Successfully sent email to: " + ticketMaster.getEmail());
+                } catch (Exception e) {
+                    failureCount++;
+                    System.err.println("Failed to send email to: " + ticketMaster.getEmail());
+                    e.printStackTrace();
+                }
+            }
+            
+            result.put("success", successCount);
+            result.put("failure", failureCount);
+            result.put("skipped", skippedCount);
+            
+            System.out.println("Bulk email send completed. Success: " + successCount + ", Failures: " + failureCount + ", Skipped (unpaid): " + skippedCount);
+            
+        } catch (Exception e) {
+            System.err.println("Error in bulk send operation: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
+
+    /**
+     * Sends a single ticket email with QR code to a ticket master
+     * 
+     * @param ticketMaster The ticket master to send the email to
+     * @param event The event associated with the ticket
+     * @throws Exception if email sending fails
+     */
+    private void sendTicketEmailWithQR(TicketMaster ticketMaster, Event event) throws Exception {
+        String emailSubject = event.getEventName() + " Ticket Payment Received - Your QR Code";
+        
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        
+        helper.setFrom(fromEmailId);
+        helper.setTo(ticketMaster.getEmail());
+        helper.setSubject(emailSubject);
+        
+        // Get ticket details
+        List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(ticketMaster.getTicketMasterId());
+        
+        // Prepare model for template
+        Map<String, Object> model = new HashMap<>();
+        model.put("event", event);
+        model.put("ticket", ticketMaster);
+        model.put("details", details);
+        
+        // Add pricing descriptions
+        HashMap<String, Object> pricingDescMap = new HashMap<>();
+        for (TicketDetails detail : details) {
+            try {
+                String pricingDesc = eventPricingService.findEventPricingById(detail.getPricingOptionId()).getPricingDesc();
+                pricingDescMap.put(detail.getPricingOptionName(), pricingDesc);
+            } catch (Exception e) {
+                System.err.println("Could not get pricing description for: " + detail.getPricingOptionName());
+            }
+        }
+        model.put("descMap", pricingDescMap);
+        
+        // Generate QR code based on ticket master ID
+        System.out.println("Generating QR code for ticket master ID: " + ticketMaster.getTicketMasterId());
+        byte[] qrCodeImage = QRCodeGenerator.generateQRCodeImage(ticketMaster.getTicketMasterId(), 200, 200);
+        System.out.println("QR code generated successfully, size: " + qrCodeImage.length + " bytes");
+        
+        // Process template
+        String htmlBody = getFreeMarkerTemplateContent("email_tickets_qr.ftl", model);
+        
+        helper.setText(htmlBody, true);
+        
+        // Attach QR code as inline image with Content-ID matching the template
+        DataSource qrDataSource = new ByteArrayDataSource(qrCodeImage, "image/png");
+        helper.addInline("qrcode_" + ticketMaster.getTicketMasterId(), qrDataSource);
+        System.out.println("QR code attached as inline image with CID: qrcode_" + ticketMaster.getTicketMasterId());
+        
+        mailSender.send(mimeMessage);
+        System.out.println("Email sent successfully to: " + ticketMaster.getEmail());
     }
 }

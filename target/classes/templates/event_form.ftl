@@ -69,6 +69,10 @@
                     <div class="col-md-6">
                         <div class="d-flex justify-content-end gap-2">
                             <#if event.eventId?? && event.published == 1 && (event.status == "active" || event.status == "Active")>
+                                <a href="/events/send-qr-emails/${event.eventId}" type="button" class="btn btn-primary" 
+                                   title="Send QR Code Emails" onclick="return confirm('Are you sure you want to send ticket emails with QR codes to all ticket holders for ${event.eventName}?')">
+                                    <i class="fa-solid fa-qrcode"></i> Send QR Emails
+                                </a>
                                 <a href="/events/publish/${event.eventId}" type="button" class="btn btn-warning" 
                                    title="Unpublish Event" onclick="return confirm('Are you sure you want to close ${event.eventName}?')">
                                     <i class="fa-solid fa-ban"></i> Unpublish
@@ -578,6 +582,59 @@
         </#if>
 
     </main>
+    
+    <!-- Message Modal -->
+    <script>
+        // Check for message cookie and display modal
+        function getCookie(name) {
+            const value = `; $${'{'}document.cookie${'}'}`;
+            const parts = value.split(`; $${'{'}name${'}'}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+        
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+        
+        // Check if there's a message cookie
+        const messageCookie = getCookie('message');
+        if (messageCookie) {
+            const message = decodeURIComponent(messageCookie);
+            
+            // Create and show modal
+            const modalHtml = `
+                <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="messageModalLabel">
+                                    <i class="fa-solid fa-envelope-circle-check"></i> Email Status
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <pre style="white-space: pre-wrap; font-family: inherit; font-size: 1rem;">$${'{'}message${'}'}</pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const myModal = new bootstrap.Modal(document.getElementById('messageModal'));
+            myModal.show();
+            
+            // Delete the cookie after showing
+            deleteCookie('message');
+        }
+    </script>
+    
     <footer class="bg-dark text-white text-center py-3 mt-auto">
             <p>2025 Sangam &copy;. All Rights reserved.</p>
         </footer>

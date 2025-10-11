@@ -11,6 +11,7 @@ import com.sangam.sangam.service.DressCompetitionService;
 import com.sangam.sangam.service.EventPricingService;
 import com.sangam.sangam.service.EventService;
 import com.sangam.sangam.service.ParticipationService;
+import com.sangam.sangam.service.SendEmailService;
 import com.sangam.sangam.service.TicketDetailsService;
 import com.sangam.sangam.service.TicketMasterService;
 import com.sangam.sangam.service.UserService;
@@ -18,7 +19,6 @@ import com.sangam.sangam.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.net.URLDecoder;
@@ -66,6 +67,8 @@ public class EventController {
     private UserService userService;
     @Autowired
     private DressCompetitionService competitionService;
+    @Autowired
+    private SendEmailService emailService;
 
     /**
      * Displays the event creation form
@@ -731,5 +734,100 @@ public class EventController {
         }
         model.addAttribute("pricings", eventPricings);
         return "event_detail";
+    }
+
+    /**
+     * Bulk sends ticket emails with QR codes to all ticket holders for a specific event
+     * Only available for active events
+     * 
+     * @param eventId ID of the event to send tickets for
+     * @param request HTTP request for cookie-based authentication
+     * @param response HTTP response for cookie management
+     * @return redirect to event form
+     */
+    @GetMapping("/events/send-qr-emails/{eventId}")
+    public String sendBulkTicketEmailsWithQR(@PathVariable String eventId, 
+                                              HttpServletRequest request, 
+                                              HttpServletResponse response) {
+        try {
+            System.out.println("Initiating bulk QR email sending for event ID: " + eventId);
+            
+            // Check authentication via cookies (same pattern as other methods)
+            String authToken = null;
+            Cookie[] cookies = request.getCookies();
+            if(cookies != null) {
+                for(var cookie : cookies) {
+                    if(cookie.getName().equals("authToken")) {
+                        authToken = cookie.getValue();
+                    }
+                }
+            }
+
+            if(authToken == null || !userService.validateToken(authToken)) {
+                System.out.println("Authentication failed - no valid authToken");
+                return "redirect:/signin";
+            }
+
+            var user = userService.getUserByToken(authToken).get();
+            System.out.println("User authenticated: " + user.getEmail());
+
+            Event event = service.findEventById(eventId);
+            if (event == null) {
+                String encodedMessage = URLEncoder.encode("Event not found!", "UTF-8");
+                Cookie msgCookie = new Cookie("message", encodedMessage);
+                msgCookie.setHttpOnly(true);
+                msgCookie.setSecure(false);
+                msgCookie.setPath("/");
+                response.addCookie(msgCookie);
+                return "redirect:/dashboard";
+            }
+            System.out.println("Event found: " + event.getEventName() + " with status: " + event.getStatus());  
+
+            // Check if event is active
+            if (!"active".equalsIgnoreCase(event.getStatus())) {
+                String encodedMessage = URLEncoder.encode("QR emails can only be sent for active events!", "UTF-8");
+                Cookie msgCookie = new Cookie("message", encodedMessage);
+                msgCookie.setHttpOnly(true);
+                msgCookie.setSecure(false);
+                msgCookie.setPath("/");
+                response.addCookie(msgCookie);
+                return "redirect:/dashboard";
+            }
+            System.out.println("Event is active, proceeding to send emails...");
+
+            // Call the bulk send service
+            Map<String, Integer> result = emailService.bulkSendTicketEmailsWithQR(eventId);
+            
+            int successCount = result.get("success");
+            int failureCount = result.get("failure");
+            int skippedCount = result.get("skipped");
+            
+            String message = String.format(
+                "Email sending completed!%n%n✅ Successfully sent: %d%n❌ Failed: %d%n⏭️ Skipped (unpaid): %d",
+                successCount, failureCount, skippedCount
+            );
+            
+            String encodedMessage = URLEncoder.encode(message, "UTF-8");
+            Cookie msgCookie = new Cookie("message", encodedMessage);
+            msgCookie.setHttpOnly(true);
+            msgCookie.setSecure(false);
+            msgCookie.setPath("/");
+            response.addCookie(msgCookie);
+            
+        } catch (Exception e) {
+            logger.error("Error sending bulk QR emails: ", e);
+            try {
+                String encodedMessage = URLEncoder.encode("Failed to send QR emails: " + e.getMessage(), "UTF-8");
+                Cookie msgCookie = new Cookie("message", encodedMessage);
+                msgCookie.setHttpOnly(true);
+                msgCookie.setSecure(false);
+                msgCookie.setPath("/");
+                response.addCookie(msgCookie);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        
+        return "redirect:/dashboard";
     }
 }
