@@ -285,28 +285,43 @@ public class SendEmailService {
                 return result;
             }
             
-            // Filter to only include ticket masters who have paid
-            List<TicketMaster> paidTicketMasters = new ArrayList<>();
+            // Filter to only include ticket masters who have paid AND haven't received QR code yet
+            List<TicketMaster> eligibleTicketMasters = new ArrayList<>();
+            int unpaidCount = 0;
+            int alreadySentCount = 0;
+            
             for (TicketMaster ticketMaster : allTicketMasters) {
-                if (ticketMaster.getPaymentReceived() == 1) {
-                    paidTicketMasters.add(ticketMaster);
+                // Check if paid
+                if (ticketMaster.getPaymentReceived() != 1) {
+                    unpaidCount++;
+                    continue;
                 }
+                
+                // Check if QR code already sent
+                if (ticketMaster.getSentQrCode() != null && ticketMaster.getSentQrCode().equals("true")) {
+                    alreadySentCount++;
+                    System.out.println("Skipping (already sent QR code): " + ticketMaster.getEmail());
+                    continue;
+                }
+                
+                eligibleTicketMasters.add(ticketMaster);
             }
             
-            if (paidTicketMasters.isEmpty()) {
-                System.out.println("No paid ticket masters found for event: " + eventId);
-                System.out.println("Total ticket masters: " + allTicketMasters.size() + ", Paid: 0");
+            if (eligibleTicketMasters.isEmpty()) {
+                System.out.println("No eligible ticket masters found for event: " + eventId);
+                System.out.println("Total: " + allTicketMasters.size() + ", Unpaid: " + unpaidCount + ", Already sent: " + alreadySentCount);
                 result.put("skipped", allTicketMasters.size());
                 return result;
             }
             
-            System.out.println("Found " + paidTicketMasters.size() + " paid ticket masters out of " + allTicketMasters.size() + " total");
+            System.out.println("Found " + eligibleTicketMasters.size() + " eligible ticket masters (paid & not sent yet)");
+            System.out.println("Unpaid: " + unpaidCount + ", Already sent QR: " + alreadySentCount);
+            
             int successCount = 0;
             int failureCount = 0;
-            int skippedCount = allTicketMasters.size() - paidTicketMasters.size();
             
-            // Send email to each PAID ticket master
-            for (TicketMaster ticketMaster : paidTicketMasters) {
+            // Send email to each eligible ticket master
+            for (TicketMaster ticketMaster : eligibleTicketMasters) {
                 try {
                     sendTicketEmailWithQR(ticketMaster, event);
                     successCount++;
@@ -320,9 +335,9 @@ public class SendEmailService {
             
             result.put("success", successCount);
             result.put("failure", failureCount);
-            result.put("skipped", skippedCount);
+            result.put("skipped", unpaidCount + alreadySentCount);
             
-            System.out.println("Bulk email send completed. Success: " + successCount + ", Failures: " + failureCount + ", Skipped (unpaid): " + skippedCount);
+            System.out.println("Bulk email send completed. Success: " + successCount + ", Failures: " + failureCount + ", Skipped: " + (unpaidCount + alreadySentCount) + " (Unpaid: " + unpaidCount + ", Already sent: " + alreadySentCount + ")");
             
         } catch (Exception e) {
             System.err.println("Error in bulk send operation: " + e.getMessage());
@@ -387,5 +402,10 @@ public class SendEmailService {
         
         mailSender.send(mimeMessage);
         System.out.println("Email sent successfully to: " + ticketMaster.getEmail());
+        
+        // Update ticket master to mark QR code as sent
+        ticketMaster.setSentQrCode("true");
+        ticketMasterService.updateTicketMaster(ticketMaster);
+        System.out.println("Updated sentQrCode flag to 'true' for ticket master: " + ticketMaster.getTicketMasterId());
     }
 }

@@ -8,10 +8,47 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/6e1d51a9e9.js" crossorigin="anonymous"></script>
     <style>
         @media (max-width: 576px) {
             .table-responsive {
                 overflow-x: auto;
+            }
+            
+            /* Mobile button styling */
+            .mobile-action-btn {
+                margin-bottom: 0.75rem;
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+                font-weight: 500;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .mobile-action-btn i {
+                font-size: 1.1rem;
+                margin-right: 0.5rem;
+            }
+            
+            /* Stack buttons vertically on mobile */
+            .button-row-mobile > div {
+                margin-bottom: 0.5rem;
+            }
+            
+            /* Make search input nicer on mobile */
+            .input-group-text {
+                font-size: 1.2rem;
+            }
+            
+            .form-control {
+                font-size: 1rem;
+                padding: 0.75rem;
+            }
+        }
+        
+        @media (min-width: 577px) {
+            .mobile-action-btn {
+                padding: 0.5rem 1rem;
             }
         }
     </style>
@@ -23,17 +60,24 @@
     <main class="flex-grow-1">
         <div id="main-content">
             <div class="container mt-3">
-                <div class="row mb-3">
-                    <h3 class="col-12 col-lg-6">
+                <div class="row mb-3 button-row-mobile">
+                    <h3 class="col-12 col-lg-6 mb-3 mb-lg-0">
                         Check In Tickets
                         <#if selectedEventId?? && selectedEventId != "" && eventsMap[selectedEventId]??>
                             <span class="fs-5 text-muted">- ${eventsMap[selectedEventId].eventName}</span>
                         </#if>
                     </h3>
-                    <div class="col-12 col-sm-6 col-lg-3">
-                        <button id="toggleButton" class="btn btn-success w-100">Show All</button>
+                    <div class="col-12 col-sm-6 col-lg-2">
+                        <a href="/qr-scanner<#if selectedEventId?? && selectedEventId != ''>?eventId=${selectedEventId}</#if>" class="btn btn-info w-100 mobile-action-btn">
+                            <i class="fa-solid fa-qrcode"></i> QR Scanner
+                        </a>
                     </div>
-                    <div class="col-12 col-lg-3">
+                    <div class="col-12 col-sm-6 col-lg-2">
+                        <button id="toggleButton" class="btn btn-success w-100 mobile-action-btn">
+                            <i class="fa-solid fa-eye"></i> Show All
+                        </button>
+                    </div>
+                    <div class="col-12 col-lg-2">
                         <div class="input-group mb-3">
                             <span class="input-group-text" id="basic-addon1">&#128270</span>
                             <input class="form-control" type="text" id="searchInput" onkeyup="searchFunction()" placeholder="Search names...">

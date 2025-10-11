@@ -9,7 +9,6 @@ com\sangam\sangam\model\DressCompetition.class
 com\sangam\sangam\model\EventPricing.class
 com\sangam\sangam\service\ParticipationService.class
 com\sangam\sangam\controller\DonateController.class
-com\sangam\sangam\controller\SignInController.class
 com\sangam\sangam\repo\TicketMasterRepository.class
 com\sangam\sangam\service\EventPricingService.class
 com\sangam\sangam\SangamApplication.class

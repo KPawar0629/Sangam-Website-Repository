@@ -25,4 +25,5 @@ public class TicketMaster {
     private String phoneNumber;
     private boolean isRsvp;
     private int rsvpCount;
+    private String sentQrCode; // "true" if QR code email sent, empty/null otherwise
 }

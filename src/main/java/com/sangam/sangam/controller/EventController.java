@@ -803,7 +803,7 @@ public class EventController {
             int skippedCount = result.get("skipped");
             
             String message = String.format(
-                "Email sending completed!%n%n✅ Successfully sent: %d%n❌ Failed: %d%n⏭️ Skipped (unpaid): %d",
+                "Email sending completed!%n%n✅ Successfully sent: %d%n❌ Failed: %d%n⏭️ Skipped: %d%n%n(Skipped includes unpaid tickets and those already sent QR codes)",
                 successCount, failureCount, skippedCount
             );
             

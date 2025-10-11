@@ -50,9 +50,161 @@
         .navbar-nav > li > .dropdown-menu { 
             background: linear-gradient(45deg, #f4c542, #fff, #a8d8a3);
         }
+        
+        /* Global Loading Overlay */
+        #global-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        #global-loader.active {
+            display: flex;
+        }
+        
+        .loader-content {
+            text-align: center;
+            color: white;
+        }
+        
+        /* Spinner Animation */
+        .spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .spinner-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 4px solid transparent;
+            border-top-color: #f4c542;
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            top: 0;
+            left: 0;
+        }
+        
+        .spinner-ring:nth-child(2) {
+            border-top-color: #a8d8a3;
+            animation-delay: -0.5s;
+        }
+        
+        .spinner-ring:nth-child(3) {
+            border-top-color: #76b5c5;
+            animation-delay: -1s;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Sangam Logo Animation */
+        .loader-logo {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            top: 19%;
+            left: 19%;
+            z-index: 10;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .loader-logo img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(244, 197, 66, 0.5);
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+        
+        .loader-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 20px;
+            animation: fadeInOut 2s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% {
+                opacity: 0.5;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+        
+        /* Dots animation */
+        .loading-dots span {
+            animation: blink 1.4s infinite;
+            animation-fill-mode: both;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes blink {
+            0%, 80%, 100% {
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Global Loading Overlay -->
+    <div id="global-loader">
+        <div class="loader-content">
+            <div class="spinner">
+                <div class="loader-logo">
+                    <img src="/imgs/logo1.png" alt="Sangam Logo">
+                </div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+                <div class="spinner-ring"></div>
+            </div>
+            <div class="loader-text">
+                Loading<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+            </div>
+        </div>
+    </div>
+    
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <a class="navbar-brand fs-1" href="/dashboard">
@@ -115,6 +267,109 @@
         </div>
     </nav>
 
+    <script>
+        // Global Loading Animation Controller
+        (function() {
+            const loader = document.getElementById('global-loader');
+            
+            // Show loader when page starts loading
+            window.addEventListener('beforeunload', function() {
+                showLoader();
+            });
+            
+            // Hide loader when page is fully loaded
+            window.addEventListener('load', function() {
+                hideLoader();
+            });
+            
+            // Show loader on initial page load
+            document.addEventListener('DOMContentLoaded', function() {
+                hideLoader();
+            });
+            
+            // Intercept all link clicks
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a');
+                
+                if (target && target.href) {
+                    // Check if it's an external link or special link
+                    const href = target.getAttribute('href');
+                    
+                    // Don't show loader for:
+                    // - Hash links (#)
+                    // - JavaScript links (javascript:)
+                    // - External links (different domain)
+                    // - Download links
+                    // - Links that open in new tab
+                    if (href && 
+                        !href.startsWith('#') && 
+                        !href.startsWith('javascript:') &&
+                        !target.hasAttribute('download') &&
+                        target.target !== '_blank' &&
+                        target.hostname === window.location.hostname) {
+                        
+                        showLoader();
+                    }
+                }
+            });
+            
+            // Intercept form submissions
+            document.addEventListener('submit', function(e) {
+                const form = e.target;
+                
+                // Don't show loader for forms with certain classes or attributes
+                if (!form.classList.contains('no-loader') && 
+                    !form.hasAttribute('data-no-loader')) {
+                    showLoader();
+                }
+            });
+            
+            // Show loader for AJAX requests (if using fetch)
+            const originalFetch = window.fetch;
+            window.fetch = function() {
+                showLoader();
+                return originalFetch.apply(this, arguments).finally(() => {
+                    setTimeout(hideLoader, 300); // Small delay for better UX
+                });
+            };
+            
+            function showLoader() {
+                if (loader) {
+                    loader.classList.add('active');
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling
+                }
+            }
+            
+            function hideLoader() {
+                if (loader) {
+                    // Small delay to ensure smooth transition
+                    setTimeout(() => {
+                        loader.classList.remove('active');
+                        document.body.style.overflow = ''; // Restore scrolling
+                    }, 100);
+                }
+            }
+            
+            // Expose functions globally for manual control
+            window.showLoader = showLoader;
+            window.hideLoader = hideLoader;
+            
+            // Handle browser back/forward buttons
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    hideLoader();
+                }
+            });
+            
+            // Fallback: auto-hide loader after 10 seconds (in case something goes wrong)
+            setTimeout(() => {
+                if (loader && loader.classList.contains('active')) {
+                    console.warn('Loader was active for too long, auto-hiding');
+                    hideLoader();
+                }
+            }, 10000);
+        })();
+    </script>
 
 </body>
 </html>

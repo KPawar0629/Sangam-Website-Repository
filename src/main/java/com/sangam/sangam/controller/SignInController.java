@@ -24,8 +24,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.http.ResponseEntity;
 
 import java.io.File;
 import java.lang.StackWalker.Option;
@@ -255,7 +257,14 @@ public class SignInController {
     }
 
     @GetMapping("/checkin")
-    public String showCheckIn(@RequestParam(value = "eventId", required = false) String eventId, HttpSession session, Model model, HttpServletRequest request) {
+    public String showCheckIn(
+            @RequestParam(value = "eventId", required = false) String eventId,
+            @RequestParam(value = "selectedEventId", required = false) String selectedEventId,
+            HttpSession session, Model model, HttpServletRequest request) {
+        
+        // Use selectedEventId if eventId is not provided (for backward compatibility)
+        String finalEventId = (eventId != null && !eventId.isEmpty()) ? eventId : selectedEventId;
+        
         // Authentication using cookies (same pattern as other methods)
         String authToken = null;
         Cookie[] cookies = request.getCookies();
@@ -280,13 +289,13 @@ public class SignInController {
 
         // Load ticket details for check-in (filtered by event if specified)
         List<TicketDetails> details;
-        if (eventId != null && !eventId.isEmpty()) {
-            details = ticketDetailsService.findByEventId(eventId);
+        if (finalEventId != null && !finalEventId.isEmpty()) {
+            details = ticketDetailsService.findByEventId(finalEventId);
         } else {
             details = ticketDetailsService.findAllTicketDetails();
         }
         model.addAttribute("details", details);
-        model.addAttribute("selectedEventId", eventId);
+        model.addAttribute("selectedEventId", finalEventId);
 
         // Load all events for the dropdown filter
         List<Event> events = eventService.findAllEvents();
@@ -684,6 +693,227 @@ public class SignInController {
             }
         }
         return "redirect:/participant_list";
+    }
+
+    /**
+     * Displays the QR code scanner page for ticket check-in
+     * Requires user authentication
+     * 
+     * @param model Spring MVC Model for view attributes
+     * @param request HTTP request to retrieve cookies for authentication
+     * @return the QR scanner view or redirect to signin if not authenticated
+     */
+    @GetMapping("/qr-scanner")
+    public String showQRScanner(@RequestParam(required = false) String eventId, 
+                                Model model, 
+                                HttpServletRequest request) {
+        String authToken = null;
+
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(var cookie : cookies) {
+                if(cookie.getName().equals("authToken")) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+
+        if(authToken != null) {
+            if(userService.validateToken(authToken)) {
+                var user = userService.getUserByToken(authToken).get();
+                model.addAttribute("loggedInUser", user);
+                
+                // Pass event ID to the view if provided
+                if(eventId != null && !eventId.isEmpty()) {
+                    model.addAttribute("eventId", eventId);
+                    
+                    // Optionally get event name for display
+                    try {
+                        Event event = eventService.findEventById(eventId);
+                        if(event != null) {
+                            model.addAttribute("eventName", event.getEventName());
+                        }
+                    } catch (Exception e) {
+                        // Event not found, just continue without event name
+                    }
+                }
+                
+                return "qr_scanner";
+            } else {
+                return "redirect:/signin";
+            }
+        } else {
+            return "redirect:/signin";
+        }
+    }
+
+    /**
+     * API endpoint to fetch ticket details by scanning QR code
+     * Returns ticket master info, associated ticket details, and event information
+     * 
+     * @param ticketMasterId The ticket master ID from the scanned QR code
+     * @param request HTTP request to retrieve cookies for authentication
+     * @return JSON response with ticket details or error message
+     */
+    @GetMapping("/api/qr-scan/{ticketMasterId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> scanQRCode(
+            @PathVariable String ticketMasterId,
+            HttpServletRequest request) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Authenticate user
+            String authToken = null;
+            Cookie[] cookies = request.getCookies();
+            if(cookies != null) {
+                for(var cookie : cookies) {
+                    if(cookie.getName().equals("authToken")) {
+                        authToken = cookie.getValue();
+                    }
+                }
+            }
+
+            if(authToken == null || !userService.validateToken(authToken)) {
+                response.put("success", false);
+                response.put("message", "Authentication required");
+                return ResponseEntity.status(401).body(response);
+            }
+
+            // Find ticket master
+            TicketMaster ticketMaster = ticketMasterService.findTicketMasterById(ticketMasterId);
+            if(ticketMaster == null) {
+                response.put("success", false);
+                response.put("message", "Ticket not found. Invalid QR code.");
+                return ResponseEntity.ok(response);
+            }
+            
+            // Find associated ticket details
+            List<TicketDetails> ticketDetails = ticketDetailsService.findTicketDetailsByTicketId(ticketMasterId);
+            if(ticketDetails.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "No ticket details found for this ticket.");
+                return ResponseEntity.ok(response);
+            }
+
+            // Find event
+            Event event = eventService.findEventById(ticketMaster.getEventId());
+            if(event == null) {
+                response.put("success", false);
+                response.put("message", "Event not found for this ticket.");
+                return ResponseEntity.ok(response);
+            }
+
+            // Build pricing map (pricing option ID -> pricing name)
+            Map<String, String> pricingMap = new HashMap<>();
+            List<EventPricing> eventPricings = eventPricingService.findEventPricingsByEventId(event.getEventId());
+            for(EventPricing pricing : eventPricings) {
+                pricingMap.put(pricing.getId(), pricing.getPricingName());
+            }
+
+            // Build response
+            response.put("success", true);
+            response.put("ticketMaster", ticketMaster);
+            response.put("ticketDetails", ticketDetails);
+            response.put("event", event);
+            response.put("pricingMap", pricingMap);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            logger.error("Error processing QR scan: ", e);
+            response.put("success", false);
+            response.put("message", "Error processing QR code: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    /**
+     * Handles check-in of selected tickets from QR scanner
+     * Processes multiple ticket details at once
+     * 
+     * @param ticketMasterId The ticket master ID
+     * @param ticketIds Array of ticket detail IDs to check in
+     * @param request HTTP request for authentication
+     * @param response HTTP response for cookie management
+     * @return redirect to QR scanner page with success message
+     */
+    @PostMapping("/qr-checkin")
+    public String handleQRCheckIn(
+            @RequestParam("ticketMasterId") String ticketMasterId,
+            @RequestParam("ticketIds") String[] ticketIds,
+            @RequestParam(required = false) String eventId,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        
+        String authToken = null;
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for(var cookie : cookies) {
+                if(cookie.getName().equals("authToken")) {
+                    authToken = cookie.getValue();
+                }
+            }
+        }
+        
+        var user = new User();
+        if(authToken != null) {
+            if(userService.validateToken(authToken)) {
+                user = userService.getUserByToken(authToken).get();
+            } else {
+                return "redirect:/signin";
+            }
+        } else {
+            return "redirect:/signin";
+        }
+
+        int checkedInCount = 0;
+        int alreadyCheckedInCount = 0;
+
+        // Process each selected ticket for check-in
+        for (String ticketId : ticketIds) {
+            Optional<TicketDetails> detailsOpt = ticketDetailsService.findTicketDetailsByDetailsId(ticketId);
+
+            if (detailsOpt.isPresent()) {
+                TicketDetails ticketDetails = detailsOpt.get();
+                
+                if(ticketDetails.getCheckedIn() == 1) {
+                    alreadyCheckedInCount++;
+                } else {
+                    ticketDetails.setCheckedIn(1);
+                    ticketDetails.setCheckedInBy(user.getUserId());
+                    ticketDetails.setCheckedInAt(new Date().toString());
+                    ticketDetailsService.addOrUpdateTicketDetails(ticketDetails);
+                    checkedInCount++;
+                }
+            }
+        }
+
+        // Set success message
+        try {
+            String message = String.format(
+                "Check-in successful!%n✅ Checked in: %d ticket(s)%s",
+                checkedInCount,
+                alreadyCheckedInCount > 0 ? String.format("%n⚠️ Already checked in: %d ticket(s)", alreadyCheckedInCount) : ""
+            );
+            
+            String encodedMessage = URLEncoder.encode(message, "UTF-8");
+            Cookie msgCookie = new Cookie("qr-message", encodedMessage);
+            msgCookie.setHttpOnly(true);
+            msgCookie.setSecure(false);
+            msgCookie.setPath("/");
+            response.addCookie(msgCookie);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Preserve eventId in redirect if it was provided
+        if(eventId != null && !eventId.isEmpty()) {
+            return "redirect:/qr-scanner?eventId=" + eventId;
+        }
+        
+        return "redirect:/qr-scanner";
     }
 
 }
