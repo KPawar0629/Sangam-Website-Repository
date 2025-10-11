@@ -890,12 +890,12 @@ public class SignInController {
             }
         }
 
-        // Set success message
+        // Set success message in format that JavaScript expects
         try {
             String message = String.format(
-                "Check-in successful!%n✅ Checked in: %d ticket(s)%s",
+                "Checked in: %d%s",
                 checkedInCount,
-                alreadyCheckedInCount > 0 ? String.format("%n⚠️ Already checked in: %d ticket(s)", alreadyCheckedInCount) : ""
+                alreadyCheckedInCount > 0 ? String.format("%nAlready checked in: %d", alreadyCheckedInCount) : ""
             );
             
             String encodedMessage = URLEncoder.encode(message, "UTF-8");

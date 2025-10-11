@@ -221,6 +221,28 @@
         </div>
     </div>
     
+    <!-- Check-In Success Modal -->
+    <div class="modal fade" id="checkinModal" tabindex="-1" aria-labelledby="checkinModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="checkinModalLabel">
+                        <i class="fa-solid fa-check-circle me-2"></i>Check-In Successful!
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center" id="modal-body-content">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                        <i class="fa-solid fa-check"></i> OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <main class="flex-grow-1">
         <div class="container mt-4 mb-5 pb-4">
             <!-- Success Message Alert -->
@@ -348,6 +370,8 @@
     });
     
     function showCheckinToast(message) {
+        console.log('Showing check-in notification with message:', message);
+        
         // Parse the message to extract counts
         const lines = message.split(/\\n|%0A/);
         let checkedInCount = 0;
@@ -365,49 +389,53 @@
             alreadyCheckedInCount = parseInt(alreadyMatch[1]);
         }
         
+        console.log('Checked in:', checkedInCount, 'Already checked in:', alreadyCheckedInCount);
+        
         // Play success sound if any tickets were checked in
         if (checkedInCount > 0) {
             playSuccessSound();
         }
         
-        // Build toast message HTML
-        let toastHTML = `
-            <div class="text-center mb-2">
-                <div class="checkin-count">
-                    <i class="fa-solid fa-check-circle-double"></i> $${'{'}checkedInCount${'}'}
+        // Build modal content HTML
+        let modalHTML = `
+            <div class="mb-3">
+                <div class="checkin-count" style="font-size: 4rem; font-weight: bold; color: #28a745; animation: bounceIn 0.5s ease-out;">
+                    <i class="fa-solid fa-circle-check"></i> $${'{'}checkedInCount${'}'}
                 </div>
-                <div class="text-muted">ticket$${'{'}checkedInCount !== 1 ? 's' : ''${'}'} checked in successfully!</div>
+                <h5 class="mt-3">Ticket$${'{'}checkedInCount !== 1 ? 's' : ''${'}'} Checked In Successfully!</h5>
             </div>
         `;
         
         if (alreadyCheckedInCount > 0) {
-            toastHTML += `
-                <div class="alert alert-warning mb-0 mt-2" role="alert">
+            modalHTML += `
+                <div class="alert alert-warning" role="alert">
                     <i class="fa-solid fa-exclamation-triangle"></i>
                     <strong>${'{'}alreadyCheckedInCount${'}'}</strong> ticket$${'{'}alreadyCheckedInCount !== 1 ? 's were' : ' was'${'}'} already checked in
                 </div>
             `;
         }
         
-        // Update toast content
-        document.getElementById('toast-message').innerHTML = toastHTML;
+        // Update modal content
+        document.getElementById('modal-body-content').innerHTML = modalHTML;
         
-        // Show the toast
+        // Show the modal
+        const modalElement = document.getElementById('checkinModal');
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Also show the toast for extra feedback
+        document.getElementById('toast-message').innerHTML = `
+            <div class="text-center">
+                <strong>${'{'}checkedInCount${'}'}</strong> ticket$${'{'}checkedInCount !== 1 ? 's' : ''${'}'} checked in!
+            </div>
+        `;
+        
         const toastElement = document.getElementById('checkin-toast');
         const toast = new bootstrap.Toast(toastElement, {
             autohide: true,
-            delay: 6000  // Show for 6 seconds
+            delay: 4000
         });
         toast.show();
-        
-        // Also show brief success alert
-        document.getElementById('success-message').innerHTML = message.replace(/\\n/g, '<br>').replace(/%0A/g, '<br>');
-        document.getElementById('success-alert').classList.remove('d-none');
-        
-        // Auto-hide alert after 5 seconds
-        setTimeout(() => {
-            document.getElementById('success-alert').classList.add('d-none');
-        }, 5000);
     }
     
     function playSuccessSound() {

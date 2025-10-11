@@ -149,27 +149,17 @@ public class SendEmailService {
     public void sendTicketEmail(String recipient, Model model) {
         try {
             Event event = (Event) model.getAttribute("event");
-            String emailSubject = event.getEventName() + " Ticket Payment Received!";
-            System.out.println("Sending ticket email!");
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-            System.out.println("Sending ticket email! 2");
-
-            helper.setFrom(fromEmailId);
-            helper.setTo(recipient);
-            helper.setSubject(emailSubject);
-            System.out.println("Sending ticket email! 3");
-
-            Map<String, Object> modelMap = model.asMap();
-            String htmlBody = getFreeMarkerTemplateContent("email_tickets.ftl", modelMap);
-            System.out.println("Back from template now!");
-            System.out.println("Sending ticket email! 4");
-
-            helper.setText(htmlBody, true);
-            mailSender.send(mimeMessage);
-            System.out.println("And sent now!");
+            TicketMaster ticketMaster = (TicketMaster) model.getAttribute("ticket");
+            
+            System.out.println("Sending ticket email with QR code to: " + recipient);
+            
+            // Now always send the QR code version
+            sendTicketEmailWithQR(ticketMaster, event);
+            
+            System.out.println("Ticket email with QR code sent successfully!");
 
         } catch (Exception e) {
+            System.err.println("Error sending ticket email: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -354,7 +344,7 @@ public class SendEmailService {
      * @param event The event associated with the ticket
      * @throws Exception if email sending fails
      */
-    private void sendTicketEmailWithQR(TicketMaster ticketMaster, Event event) throws Exception {
+    public void sendTicketEmailWithQR(TicketMaster ticketMaster, Event event) throws Exception {
         String emailSubject = event.getEventName() + " Ticket Payment Received - Your QR Code";
         
         MimeMessage mimeMessage = mailSender.createMimeMessage();
