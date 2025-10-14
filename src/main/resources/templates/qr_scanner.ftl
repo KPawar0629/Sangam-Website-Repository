@@ -255,7 +255,7 @@
                 <div class="col-12">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h3 class="mb-0">
-                            <i class="fa-solid fa-qrcode"></i> QR Code Check-In
+                            <i class="fa-solid fa-qrcode"></i> QR Check-In
                             <#if eventName??>
                                 <span class="fs-5 text-muted">- ${eventName}</span>
                             </#if>
@@ -304,7 +304,7 @@
                     <div class="card">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">
-                                <i class="fa-solid fa-ticket"></i> Scanned Ticket Details
+                                <i class="fa-solid fa-ticket"></i> Ticket Details
                             </h5>
                         </div>
                         <div class="card-body">
@@ -319,13 +319,12 @@
                                 </#if>
                                 
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="mb-0">Select Tickets to Check In:</h6>
                                     <div>
                                         <button type="button" class="btn btn-sm btn-outline-primary" onclick="selectAll()">
-                                            Select
+                                            Select All
                                         </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="deselectAll()">
-                                            Deselect
+                                            Deselect All
                                         </button>
                                     </div>
                                 </div>
@@ -568,10 +567,8 @@
             <div class="row">
                 <div class="col-md-6">
                     <p><strong><i class="fa-solid fa-user"></i> Name:</strong> $${'{'}data.ticketMaster.fullName${'}'}</p>
-                    <p><strong><i class="fa-solid fa-envelope"></i> Email:</strong> $${'{'}data.ticketMaster.email${'}'}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong><i class="fa-solid fa-calendar"></i> Event:</strong> $${'{'}data.event.eventName${'}'}</p>
                     <p><strong><i class="fa-solid fa-ticket"></i> Total Tickets:</strong> $${'{'}data.ticketDetails.length${'}'}</p>
                 </div>
             </div>
