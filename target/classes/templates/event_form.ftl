@@ -58,6 +58,27 @@
         input[type="datetime-local"] {
             width: 100%;
         }
+
+        /* Mobile button layout - 2 buttons per row */
+        @media (max-width: 767px) {
+            .button-container {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                width: 100%;
+            }
+
+            .button-container .btn {
+                width: 100%;
+                font-size: 0.85rem;
+                padding: 8px 10px;
+            }
+
+            .button-container .btn i {
+                display: block;
+                margin-bottom: 4px;
+            }
+        }
     </style>
     <main class="container mt-3 flex-grow-1">
         <form action="/events" method="post">
@@ -67,7 +88,7 @@
                         <h2>${event.eventId?has_content?then('Edit Event', 'Create New Event')}</h2>
                     </div>
                     <div class="col-md-6">
-                        <div class="d-flex justify-content-end gap-2">
+                        <div class="d-flex justify-content-end gap-2 button-container">
                             <#if event.eventId?? && event.published == 1 && (event.status == "active" || event.status == "Active")>
                                 <a href="/events/send-qr-emails/${event.eventId}" type="button" class="btn btn-primary" 
                                    title="Send QR Code Emails" onclick="return confirm('Are you sure you want to send ticket emails with QR codes to all ticket holders for ${event.eventName}?')">

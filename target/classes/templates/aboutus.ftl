@@ -180,7 +180,8 @@
         Deepam Joshi (805)252-9042<br>Gurudatt Pawar (805)568-8134<br>Kishan Khemani (805)570-8134<br>Madhu Khemani (805)252-0625<br>Nitin Mohan (214)796-8571<br>Simar Gulati (805)403-9679<br>Suresh Sampath(805)570-6140<br>Vandana Khare (805)698-4920<br><a href="mailto:sbdesis@gmail.com">SB Desis Email: sbdesis@gmail.com</a>
         </p>
         </div>
-        </div>		
+        </section>
+        </div>
 
         <!-- Nonprofit Information Section -->
         <div class="text-center mt-5 mb-4">
@@ -191,8 +192,9 @@
         </div>
 
     </div>
-        </div>
     </main>
+
+    </div>
 
     <footer class="bg-dark text-white text-center py-3 mt-auto">
         <p>2025 Sangam &copy;. All Rights reserved.</p>
