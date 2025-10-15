@@ -123,10 +123,9 @@
                     <div class="construction-body">
                         <i class="fa-solid fa-heart construction-icon heartbeat"></i>
                         <h2 class="donation-coming-soon">Coming Soon</h2>
-                        <p class="lead">We are working hard to bring you our new donation platform.</p>
+                        <p class="lead">Please contact <strong>Kishan Khemani</strong> at <strong>+1 (805) 570-8134.</strong></p>
                         <p>Your generous contributions will help us continue to serve our community and organize cultural events.</p>
-                        <p>Please check back soon or contact us directly to make a donation.</p>
-                        
+
                         <a href="/" class="btn btn-warning btn-return">
                             <i class="fa-solid fa-house me-2"></i> Return to Homepage
                         </a>
@@ -137,8 +136,7 @@
                 <div class="text-center mt-4 mb-4">
                     <div class="alert alert-info d-inline-block" role="alert">
                         <i class="fa-solid fa-heart text-primary"></i>
-                        <strong>SANGAM Santa Barbara Inc.</strong> is a <strong>501(c)(3) Non-Profit Public Organization.</strong><br>
-                        <small class="text-muted">Federal Tax ID: 39-3121864</small><br>
+                        <strong>SANGAM Santa Barbara Inc.</strong> is a <strong>501(c)(3) Non-Profit Organization.</strong><br>
                         <small class="text-muted"> Your contributions support our community programs.</small>
                     </div>
                 </div>

@@ -52,8 +52,8 @@ public class SendEmailService {
     @Autowired
     private FreeMarkerConfigurer freeMarkerConfigurer;
 
-     private String fromEmailId = "sbdesis@gmail.com";
-//    private String fromEmailId = "inception.kaustubh@gmail.com";
+//     private String fromEmailId = "sbdesis@gmail.com";
+    private String fromEmailId = "inception.kaustubh@gmail.com";
 
     @Async
     public void sendPaymentEmailAsync(String recipient, Model model) {
@@ -313,7 +313,7 @@ public class SendEmailService {
             // Send email to each eligible ticket master
             for (TicketMaster ticketMaster : eligibleTicketMasters) {
                 try {
-                    sendTicketEmailWithQR(ticketMaster, event);
+                    sendTicketEmailWithQRBulk(ticketMaster, event);
                     successCount++;
                     System.out.println("Successfully sent email to: " + ticketMaster.getEmail());
                 } catch (Exception e) {
@@ -344,8 +344,8 @@ public class SendEmailService {
      * @param event The event associated with the ticket
      * @throws Exception if email sending fails
      */
-    public void sendTicketEmailWithQR(TicketMaster ticketMaster, Event event) throws Exception {
-        String emailSubject = event.getEventName() + " Ticket Payment Received - Your QR Code";
+    public void sendTicketEmailWithQRBulk(TicketMaster ticketMaster, Event event) throws Exception {
+        String emailSubject = event.getEventName() + " Ticket - QR Code";
         
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
@@ -381,7 +381,7 @@ public class SendEmailService {
         System.out.println("QR code generated successfully, size: " + qrCodeImage.length + " bytes");
         
         // Process template
-        String htmlBody = getFreeMarkerTemplateContent("email_tickets_qr.ftl", model);
+        String htmlBody = getFreeMarkerTemplateContent("email_tickets_qr_bulk.ftl", model);
         
         helper.setText(htmlBody, true);
         
@@ -393,6 +393,68 @@ public class SendEmailService {
         mailSender.send(mimeMessage);
         System.out.println("Email sent successfully to: " + ticketMaster.getEmail());
         
+        // Update ticket master to mark QR code as sent
+        ticketMaster.setSentQrCode("true");
+        ticketMasterService.updateTicketMaster(ticketMaster);
+        System.out.println("Updated sentQrCode flag to 'true' for ticket master: " + ticketMaster.getTicketMasterId());
+    }
+
+    /**
+     * Sends a single ticket email with QR code to a ticket master
+     *
+     * @param ticketMaster The ticket master to send the email to
+     * @param event The event associated with the ticket
+     * @throws Exception if email sending fails
+     */
+    public void sendTicketEmailWithQR(TicketMaster ticketMaster, Event event) throws Exception {
+        String emailSubject = event.getEventName() + " Ticket Payment Received";
+
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+
+        helper.setFrom(fromEmailId);
+        helper.setTo(ticketMaster.getEmail());
+        helper.setSubject(emailSubject);
+
+        // Get ticket details
+        List<TicketDetails> details = ticketDetailsService.findTicketDetailsByTicketId(ticketMaster.getTicketMasterId());
+
+        // Prepare model for template
+        Map<String, Object> model = new HashMap<>();
+        model.put("event", event);
+        model.put("ticket", ticketMaster);
+        model.put("details", details);
+
+        // Add pricing descriptions
+        HashMap<String, Object> pricingDescMap = new HashMap<>();
+        for (TicketDetails detail : details) {
+            try {
+                String pricingDesc = eventPricingService.findEventPricingById(detail.getPricingOptionId()).getPricingDesc();
+                pricingDescMap.put(detail.getPricingOptionName(), pricingDesc);
+            } catch (Exception e) {
+                System.err.println("Could not get pricing description for: " + detail.getPricingOptionName());
+            }
+        }
+        model.put("descMap", pricingDescMap);
+
+        // Generate QR code based on ticket master ID
+        System.out.println("Generating QR code for ticket master ID: " + ticketMaster.getTicketMasterId());
+        byte[] qrCodeImage = QRCodeGenerator.generateQRCodeImage(ticketMaster.getTicketMasterId(), 200, 200);
+        System.out.println("QR code generated successfully, size: " + qrCodeImage.length + " bytes");
+
+        // Process template
+        String htmlBody = getFreeMarkerTemplateContent("email_tickets_qr.ftl", model);
+
+        helper.setText(htmlBody, true);
+
+        // Attach QR code as inline image with Content-ID matching the template
+        DataSource qrDataSource = new ByteArrayDataSource(qrCodeImage, "image/png");
+        helper.addInline("qrcode_" + ticketMaster.getTicketMasterId(), qrDataSource);
+        System.out.println("QR code attached as inline image with CID: qrcode_" + ticketMaster.getTicketMasterId());
+
+        mailSender.send(mimeMessage);
+        System.out.println("Email sent successfully to: " + ticketMaster.getEmail());
+
         // Update ticket master to mark QR code as sent
         ticketMaster.setSentQrCode("true");
         ticketMasterService.updateTicketMaster(ticketMaster);

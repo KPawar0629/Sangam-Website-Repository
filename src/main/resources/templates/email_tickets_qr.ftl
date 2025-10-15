@@ -3,7 +3,7 @@
   <div style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden;">
     
     <div style="padding: 20px 30px; background-color: #4a5568; color: #ffffff; text-align: center;">
-        <h1 style="margin: 0; font-size: 24px;">Your Event Tickets</h1>
+        <h1 style="margin: 0; font-size: 24px;">${event.eventName} Tickets</h1>
     </div>
 
     <div style="padding: 30px;">
@@ -63,8 +63,7 @@
       <!-- Nonprofit Information -->
       <div style="text-align: center; margin-top: 25px; margin-bottom: 25px;">
         <div style="background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; padding: 15px; border-radius: 6px; display: inline-block; max-width: 500px;">
-          <div style="font-weight: bold; margin-bottom: 8px;">SANGAM Santa Barbara Inc. is a 501(c)(3) Non-Profit Public Organization.</div>
-          <div style="font-size: 13px; color: #6c757d; margin-bottom: 5px;">Federal Tax ID: 39-3121864</div>
+          <div style="font-weight: bold; margin-bottom: 8px;">SANGAM Santa Barbara Inc. is a 501(c)(3) Non-Profit Organization.</div>
           <div style="font-size: 13px; color: #6c757d;">Your contributions support our community programs.</div>
         </div>
       </div>
