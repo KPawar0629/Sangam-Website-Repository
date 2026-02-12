@@ -118,7 +118,7 @@
 </div>
 
 <footer class="bg-dark text-white text-center py-3">
-    <p>2025 Sangam &copy;. All Rights reserved.</p>
+    <p>${.now?string('yyyy')} Sangam &copy;. All Rights reserved.</p>
 </footer>
 <script>
 function onSubmit() {

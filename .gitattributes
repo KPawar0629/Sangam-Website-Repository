@@ -1,0 +1,9 @@
+# Auto detect text files and normalize to LF line endings
+* text=auto eol=lf
+
+# Binary files
+*.jar binary
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary

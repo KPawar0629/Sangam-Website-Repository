@@ -1,33 +1,33 @@
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\Configurer\FreeMarkerConfig.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\Configurer\WebConfig.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\EventController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\EventPricingController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\PerformanceController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\SignInController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\SignUpController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\TicketDetailsController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\TicketMasterController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\controller\UserController.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\DressCompetition.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\Event.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\EventPricing.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\Participation.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\TicketDetails.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\TicketMaster.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\model\User.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\DressCompetitionRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\EventPricingRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\EventRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\ParticipationRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\TicketDetailsRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\TicketMasterRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\repo\UserRepository.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\SangamApplication.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\DressCompetitionService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\EventPricingService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\EventService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\ParticipationService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\SendEmailService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\TicketDetailsService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\TicketMasterService.java
-C:\Users\kaust\OneDrive\Documents\Coding Courses\Sangam Proj\src\main\java\com\sangam\sangam\service\UserService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/Configurer/FreeMarkerConfig.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/Configurer/WebConfig.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/SangamApplication.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/EventController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/EventPricingController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/PerformanceController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/SignInController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/SignUpController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/TicketDetailsController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/TicketMasterController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/controller/UserController.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/DressCompetition.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/Event.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/EventPricing.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/Participation.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/TicketDetails.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/TicketMaster.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/model/User.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/DressCompetitionRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/EventPricingRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/EventRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/ParticipationRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/TicketDetailsRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/TicketMasterRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/repo/UserRepository.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/DressCompetitionService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/EventPricingService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/EventService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/ParticipationService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/SendEmailService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/TicketDetailsService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/TicketMasterService.java
+/home/nitin/Downloads/Sangam-Website-Repository-main/src/main/java/com/sangam/sangam/service/UserService.java
